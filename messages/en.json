@@ -851,7 +851,9 @@
     "online": "Online",
     "offline": "Offline",
     "ltr": "Left to right",
-    "rtl": "Right to left"
+    "rtl": "Right to left",
+    "email": "Account emails (Resend)",
+    "accounts": "Accounts"
   },
   "ai": {
     "badge": "AI",
@@ -874,10 +876,10 @@
       "last": "Last request: {cost}"
     },
     "errors": {
-      "no_key": "AI isn't connected yet. Add a Claude API key in Settings → AI.",
-      "invalid_key": "The Claude API key was rejected. Check it in Settings → AI.",
+      "no_key": "AI isn't connected yet. Add a Claude API key in Settings → Keys & usage.",
+      "invalid_key": "The Claude API key was rejected. Check it in Settings → Keys & usage.",
       "budget_exceeded": "The site's AI budget for today is used up. Try again tomorrow, or use your own key in Settings.",
-      "client_budget": "You've reached your daily AI budget. Raise it in Settings → AI or try again tomorrow.",
+      "client_budget": "You've reached your daily AI budget. Raise it in Settings → Keys & usage or try again tomorrow.",
       "rate_limited": "Lots of requests right now — wait a few seconds and try again.",
       "refused": "Claude couldn't help with that request. Try rephrasing it.",
       "invalid_request": "That request wasn't valid. Try changing the input.",
@@ -997,7 +999,7 @@
       "toggle": "Premium",
       "toggleHint": "AI artwork, 3D titles and a self-review — takes 1–3 minutes",
       "intro": "Claude art-directs, Google’s Gemini paints the artwork, then Claude lays out 3D titles and reviews its own render until it looks premium. Takes 1–3 minutes.",
-      "introNoArt": "Claude art-directs and designs with rich effects, then reviews its own render. Add a Google AI key in Settings → AI to also get painted artwork.",
+      "introNoArt": "Claude art-directs and designs with rich effects, then reviews its own render. Add a Google AI key in Settings → Keys & usage to also get painted artwork.",
       "start": "Create premium design",
       "steps": {
         "plan": "Art direction — concept, title and artwork plan",
@@ -1113,6 +1115,7 @@
       "googleKey": "Google AI key (for artwork)",
       "googleKeyHint": "From aistudio.google.com/apikey — billing must be on (about $0.05 per artwork). Saved only in this browser and sent only with your own artwork requests. Or set GEMINI_API_KEY on the server.",
       "googleKeyPlaceholder": "AIza…",
+      "getGoogleKey": "Get a key at aistudio.google.com",
       "premiumArt": "Artwork model",
       "premiumArtOptions": {
         "standard": "Nano Banana 2.1 — great (≈ $0.05)",
@@ -1123,6 +1126,11 @@
       "premiumReviewsValue": "{count, plural, =0 {Off} one {# round} other {# rounds}}",
       "tools": "Defaults for AI tools",
       "keys": "Your Claude key"
+    },
+    "account": {
+      "title": "Account",
+      "signedOut": "Log in to keep your account details here.",
+      "manage": "Manage account"
     }
   },
   "templates": {
@@ -1150,5 +1158,101 @@
       "creators": "Creators"
     },
     "showMore": "Show more templates"
+  },
+  "email": {
+    "hello": "Hi {name},",
+    "helloThere": "Hi there,",
+    "linkHint": "If the button doesn’t work, copy this link into your browser:",
+    "signature": "— The Lumora Studio team",
+    "verify": {
+      "subject": "Confirm your email for Lumora Studio",
+      "body": "Thanks for signing up! Please confirm your email address so you can log in.",
+      "action": "Confirm my email",
+      "note": "The link works for one hour. If you didn’t sign up, you can ignore this email."
+    },
+    "reset": {
+      "subject": "Reset your Lumora Studio password",
+      "body": "Someone (hopefully you) asked to reset the password for your Lumora Studio account.",
+      "action": "Choose a new password",
+      "note": "The link works for one hour. If you didn’t ask for this, ignore this email — your password stays the same."
+    },
+    "welcome": {
+      "subject": "Welcome to Lumora Studio",
+      "body": "Your email is confirmed and your account is ready. Start from more than 2,400 templates, or let AI design something for you.",
+      "action": "Open Lumora Studio"
+    },
+    "test": {
+      "subject": "Test email from Lumora Studio",
+      "body": "Emails are working. This test was sent from your Lumora Studio settings."
+    }
+  },
+  "auth": {
+    "login": "Log in",
+    "logout": "Log out",
+    "signup": "Sign up",
+    "account": "Account",
+    "accountMenu": "Account menu",
+    "name": "Your name",
+    "email": "Email",
+    "password": "Password",
+    "newPassword": "New password",
+    "currentPassword": "Current password",
+    "show": "Show password",
+    "hide": "Hide password",
+    "passwordHint": "At least 8 characters.",
+    "working": "One moment…",
+    "loginTitle": "Welcome back",
+    "loginSubtitle": "Log in to your Lumora Studio account.",
+    "loginButton": "Log in",
+    "noAccount": "New here?",
+    "createOne": "Create an account",
+    "forgot": "Forgot password?",
+    "signupTitle": "Create your account",
+    "signupSubtitle": "Free. We’ll email you a link to confirm your address.",
+    "signupButton": "Create account",
+    "haveAccount": "Already have an account?",
+    "privacy": "Your designs stay in this browser. Your account keeps your name, email and a securely hashed password.",
+    "checkInbox": "Check your inbox",
+    "checkInboxBody": "We sent a confirmation link to {email}. Open it to finish creating your account — it works for one hour.",
+    "checkSpam": "Nothing there? Check your spam folder, or send it again.",
+    "resend": "Send the link again",
+    "resent": "Sent — check your inbox.",
+    "notVerified": "Please confirm your email first. We just sent you a new link.",
+    "forgotTitle": "Forgot your password?",
+    "forgotSubtitle": "Enter your email and we’ll send you a link to choose a new one.",
+    "forgotButton": "Send reset link",
+    "forgotSent": "If there’s an account for {email}, a reset link is on its way. It works for one hour.",
+    "backToLogin": "Back to log in",
+    "resetTitle": "Choose a new password",
+    "resetSubtitle": "You’ll be logged out everywhere else.",
+    "resetButton": "Save new password",
+    "resetDone": "Your password has been changed. You can log in now.",
+    "resetInvalid": "This reset link has expired or was already used. Ask for a new one.",
+    "askAgain": "Send a new link",
+    "accountTitle": "Your account",
+    "verified": "Email confirmed",
+    "unverified": "Email not confirmed",
+    "welcome": "Your email is confirmed — welcome to Lumora Studio!",
+    "changePassword": "Change password",
+    "changePasswordButton": "Change password",
+    "passwordChanged": "Password changed. Other devices were logged out.",
+    "emails": "Emails",
+    "emailOn": "Account emails are sent with Resend.",
+    "emailOff": "Emails aren’t set up yet (no RESEND_API_KEY on the server), so they’re printed in the server’s terminal instead.",
+    "testEmail": "Send me a test email",
+    "testEmailSent": "Test email sent to {email}.",
+    "testEmailNotSent": "Not sent — set RESEND_API_KEY on the server first.",
+    "testEmailFailed": "Resend didn’t accept the email. Check the API key and the sender address (EMAIL_FROM).",
+    "designsLocal": "Your designs are saved in this browser on this computer.",
+    "signedInAs": "Signed in as {email}",
+    "loggedOut": "You’re logged out.",
+    "errors": {
+      "invalid": "That email and password don’t match.",
+      "exists": "There’s already an account with that email. Log in instead, or reset your password.",
+      "weak": "Use at least 8 characters.",
+      "wrongPassword": "Your current password isn’t right.",
+      "rateLimited": "Too many tries. Wait a minute and try again.",
+      "generic": "Something went wrong. Please try again."
+    }
   }
 }

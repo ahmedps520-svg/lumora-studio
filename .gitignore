@@ -31,3 +31,6 @@ npm-debug.log*
 
 # downloaded AI models (background removal)
 .lumora-cache/
+
+# local accounts database and the generated dev session secret
+.data/

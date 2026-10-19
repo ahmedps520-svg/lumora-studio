@@ -83,6 +83,30 @@ export function setGeminiFetch(next: typeof fetch | null) {
   fetchImpl = next ?? ((...args) => fetch(...args));
 }
 
+/**
+ * Checks that a Google AI key works, without spending anything: listing the
+ * available models is free. Throws an AiError when the key is refused.
+ */
+export async function checkGoogleKey(key: GoogleKey): Promise<void> {
+  let response: Response;
+  try {
+    response = await fetchImpl(
+      "https://generativelanguage.googleapis.com/v1beta/models?pageSize=1",
+      { headers: { "x-goog-api-key": key.apiKey }, signal: AbortSignal.timeout(15_000) },
+    );
+  } catch {
+    throw new AiError("overloaded", "Couldn't reach Google. Try again.", 503);
+  }
+  if (response.ok) return;
+  if (response.status === 400 || response.status === 401 || response.status === 403) {
+    throw new AiError("invalid_key", "Google didn't accept that key.", 401);
+  }
+  if (response.status === 429) {
+    throw new AiError("rate_limited", "Google's quota is used up for now.", 429);
+  }
+  throw new AiError("overloaded", "Google is busy. Try again.", 503);
+}
+
 interface Block {
   type?: string;
   data?: string;

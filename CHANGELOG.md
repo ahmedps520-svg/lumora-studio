@@ -5,6 +5,25 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+## [0.8.0] — 2026-10-19 — Accounts and emails
+
+### Added
+
+- **Accounts:** sign up (name, email, password), confirm your email, log in, forgotten password
+  and reset, change password, log out. A header button shows **Log in** or your account menu; an
+  **Account** page and an Account card in **Settings → General** show who is signed in. Accounts
+  are stored in `.data/lumora.db` (SQLite, never committed); passwords are hashed (scrypt) and
+  sessions are signed, HTTP-only cookies (Better Auth).
+- **Account emails with Resend:** confirm-your-email, welcome and reset-password emails in
+  English or Arabic (right-to-left), matching the site language. Without `RESEND_API_KEY` they
+  are printed in the dev server's terminal. **Send me a test email** on the Account page checks the
+  setup (it only ever emails your own confirmed address).
+- **Test key** button for the Google AI (Gemini) key in Settings → Keys & usage — free, it only
+  lists Google's models — plus a link to get a key.
+- New settings: `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `AUTH_DATABASE_PATH`,
+  `RESEND_API_KEY`, `EMAIL_FROM` (see `.env.example`); the health page shows whether email
+  is on.
+
 ## [0.7.0] — 2026-10-19 — Photos and 2,400+ templates
 
 ### Added

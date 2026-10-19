@@ -13,6 +13,7 @@ export function GET() {
       features: {
         aiOwnerKey: flags.aiOwnerKey,
         stockPhotos: { unsplash: flags.unsplash, pexels: flags.pexels, pixabay: flags.pixabay },
+        email: flags.email,
         cloudSync: flags.cloudSync,
       },
     },

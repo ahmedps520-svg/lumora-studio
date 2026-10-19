@@ -1,6 +1,7 @@
 import { LayoutTemplate, Settings } from "lucide-react";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
+import { AccountButton } from "@/components/auth/account";
 import { Logo } from "@/components/brand/logo";
 import { CreateDesignDialog } from "@/components/home/create-design-dialog";
 import { LanguageSwitcher } from "@/components/language-switcher";
@@ -39,6 +40,7 @@ export async function SiteHeader({ showCreate = true }: { showCreate?: boolean }
               <Settings className="size-5" />
             </Link>
           </Button>
+          <AccountButton />
           {showCreate && (
             <div className="ms-1">
               <CreateDesignDialog compact />

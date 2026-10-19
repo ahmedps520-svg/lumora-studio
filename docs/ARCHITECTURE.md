@@ -145,6 +145,22 @@ Planned: `src/lib/export`, `src/templates`, more panels and dialogs.
 - Playwright (`tests/e2e`) starts `next dev` (or reuses one on port 3000) and checks the health API,
   the health page in a real browser (no console errors), the CSP header and Arabic RTL.
 
+## Accounts and email (0.8.0)
+
+- `src/lib/auth/server.ts` configures Better Auth: email + password with required email
+  confirmation, password reset, and `nextCookies()`. The database is Node's built-in
+  `node:sqlite` (`DatabaseSync`) at `AUTH_DATABASE_PATH` (default `.data/lumora.db`); tables
+  are created on first use with `getMigrations`. The session secret is `BETTER_AUTH_SECRET`,
+  else one generated once into `.data/auth-secret`.
+- `/api/auth/[...all]` hands every account request to Better Auth. Pages: `/signup`, `/login`
+  (`?next=` is limited to paths on this site), `/forgot-password`, `/reset-password`,
+  `/account`. The browser side uses `authClient` (`src/lib/auth/client.ts`); server pages use
+  `currentUser()`.
+- `src/lib/email`: `renderEmail` builds the text + HTML of each email from the `email` messages
+  (language from the site cookie, else Accept-Language); `sendEmail` sends through Resend, or
+  prints in development when there's no key. `/api/email/test` emails only the signed-in user's
+  own confirmed address.
+
 ## Photos (0.7.0)
 
 - `src/lib/photos` holds the built-in library (`library.ts`: Unsplash photo ids and

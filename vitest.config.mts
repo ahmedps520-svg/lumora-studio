@@ -27,6 +27,9 @@ export default defineConfig({
           environment: "jsdom",
           setupFiles: ["./tests/setup.ts"],
           include: ["tests/unit/**/*.test.{ts,tsx}", "src/**/*.test.{ts,tsx}"],
+          // The first test in a file also loads its server modules (AI SDK, accounts), which
+          // can take a few seconds while the browser tests run alongside.
+          testTimeout: 20_000,
         },
       },
       {

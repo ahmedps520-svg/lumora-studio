@@ -37,6 +37,7 @@ export function getFeatureFlags() {
     unsplash: Boolean(env.UNSPLASH_ACCESS_KEY),
     pexels: Boolean(env.PEXELS_API_KEY),
     pixabay: Boolean(env.PIXABAY_API_KEY),
+    email: Boolean(env.RESEND_API_KEY),
     cloudSync:
       env.NEXT_PUBLIC_ENABLE_CLOUD_SYNC === "true" &&
       Boolean(env.NEXT_PUBLIC_SUPABASE_URL && env.NEXT_PUBLIC_SUPABASE_ANON_KEY),

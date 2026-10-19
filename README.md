@@ -41,6 +41,10 @@ the app keeps low and shows you.
   **Replace** in the side panel (upload or pick a stock photo), right-click → **Replace image**,
   or drop a photo or file straight onto it. The new photo keeps the old one's place, size, shape
   and filters, cropped to fit.
+- **Accounts:** sign up with email and password, confirm your email, log in, reset a forgotten
+  password, change your password, and log out (header menu and **Account** page). Account emails
+  (confirm, welcome, reset) are sent with **Resend**, in English or Arabic to match the site.
+  Your designs still stay in your browser.
 - **Right-click menus** on elements and pages (copy, paste, duplicate, layers, align, flip,
   group, lock, copy/paste style, remove background, set image as background…). Copy and paste
   work through your system clipboard, so elements move between designs and browser tabs, and
@@ -133,7 +137,7 @@ server — it is never sent to the browser. Don't paste it into chats, emails or
 - Every AI button shows an **estimated cost** before you click, and the AI panel shows
   **today's total**. A typical Magic Write request costs well under $0.001; a Magic Design costs
   a few cents per variation on Balanced.
-- There is a second, per-browser **daily budget** in **Settings → AI** (default $1).
+- There is a second, per-browser **daily budget** in **Settings → Keys & usage** (default $1).
 - Which model does what (edit `src/lib/ai/models.ts` to change it):
 
   | Setting  | Writing, palettes | Designs & assistant |
@@ -157,14 +161,36 @@ artwork** with Nano Banana 2.1, $0.13 with Nano Banana Pro).
 3. Either:
    - **Recommended:** add it to `.env.local` as `GEMINI_API_KEY=AIza…`, then restart
      `npm run dev`. The key stays on the server and counts against `AI_DAILY_BUDGET_USD`; or
-   - paste it in **Settings → AI → Google AI key**. It stays in your browser and is sent only
-     with your own artwork requests.
-4. In **Settings → AI → Premium designs** choose the artwork model (Nano Banana 2.1 or Pro) and
+   - paste it in **Settings → Keys & usage → Google AI key** and press **Test key** (free —
+     it only lists Google's models). It stays in your browser and is sent only with your own
+     artwork requests.
+4. In **Settings → Keys & usage → Premium designs** choose the artwork model (Nano Banana 2.1 or Pro) and
    how many self-review rounds Claude does (default 2).
+
+## Accounts and emails (Resend)
+
+Log in / sign up work out of the box on your computer: accounts are stored in a small database
+file, `.data/lumora.db` (never committed), and passwords are stored only as secure hashes.
+
+Without an email key, account emails (the confirm-your-email and reset-password links) are
+**printed in the terminal** where `npm run dev` runs — copy the link from there. To really send
+them:
+
+1. Create a free account at <https://resend.com> and make an API key at
+   <https://resend.com/api-keys> (it starts with `re_`).
+2. Add it to `.env.local` as `RESEND_API_KEY=re_…` and restart `npm run dev`.
+3. Until you verify your own domain in Resend, emails come from Resend's test address and can
+   only go to the email you signed up to Resend with. After verifying a domain, set
+   `EMAIL_FROM="Lumora Studio <hello@yourdomain.com>"`.
+4. Log in, open **Account** and press **Send me a test email**.
+
+When you put the site online, also set `BETTER_AUTH_SECRET` (32+ random characters — the
+`.env.example` file shows a command that makes one) and `BETTER_AUTH_URL` (the site's address,
+used in email links).
 
 ### Bring your own key
 
-Other people using your copy of Lumora can paste **their own** key in **Settings → AI**. It stays
+Other people using your copy of Lumora can paste **their own** key in **Settings → Keys & usage**. It stays
 in their browser and is sent only with their own requests — it is never stored on the server.
 A **Test key** button checks it for free (no tokens are spent). Requests made with a personal key
 don't count against the site's daily budget.
@@ -276,6 +302,9 @@ The build brief asked for sensible defaults instead of questions. Here is what w
   selected or searched yet. SVG downloads don't include page background photos or vignettes.
 - Video download needs a browser with WebCodecs (current desktop Chrome, Edge, Safari or Firefox).
   Long videos are made in memory, so very long 4K decks can use a lot of RAM.
+- Accounts live in a SQLite file on the server (`.data/lumora.db`). That's right for your
+  computer, a VPS or Docker, but serverless hosts (e.g. Vercel) don't keep files, so accounts need
+  a hosted database there — not wired up yet. Accounts don't sync designs yet.
 - The photo library is a fixed, hand-picked set (about 1,000 photos). Searching all of Unsplash
   needs a free Unsplash API key — not wired up yet. Photos load from Unsplash, so templates show
   their photos only when you're online (they're cached once seen). Template text uses made-up
@@ -296,6 +325,8 @@ The build brief asked for sensible defaults instead of questions. Here is what w
   (Apache 2.0), run with [Transformers.js](https://github.com/huggingface/transformers.js)
   (Apache 2.0) and [ONNX Runtime](https://onnxruntime.ai) (MIT).
 - Icons: [Lucide](https://lucide.dev) — ISC licence (also the icon elements in designs).
+- Accounts: [Better Auth](https://better-auth.com) (MIT). Email: [Resend](https://resend.com)
+  Node SDK (MIT).
 - Photos: [Unsplash](https://unsplash.com) — free to use under the
   [Unsplash License](https://unsplash.com/license) (no permission needed, commercial use allowed);
   each photo is credited to its photographer in the side panel. Unsplash+ photos are not used.

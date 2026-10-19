@@ -73,7 +73,7 @@ else {
 console.log("");
 if (!process.env.ANTHROPIC_API_KEY) {
   info("AI features are off until you add ANTHROPIC_API_KEY to .env.local");
-  info("(or paste your own key in the app under Settings → AI → Bring your own key).");
+  info("(or paste your own key in the app under Settings → Keys & usage).");
 }
 if (problems > 0) {
   console.log(`\n${problems} problem(s) found. Fix them in .env.local and run this again.\n`);

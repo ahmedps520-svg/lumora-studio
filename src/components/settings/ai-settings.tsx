@@ -29,7 +29,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { testApiKey } from "@/lib/ai/api";
+import { testApiKey, testGoogleKey } from "@/lib/ai/api";
 import { CREATIVITY, TONES, type Creativity, type Tone } from "@/lib/ai/contract";
 import { formatUsd } from "@/lib/ai/cost";
 import { AI_QUALITIES, MODEL_IDS, MODEL_LABELS, PRICING, type AiQuality } from "@/lib/ai/models";
@@ -91,13 +91,68 @@ const QUALITY_MODELS: Record<AiQuality, string[]> = {
   best: [MODEL_IDS.opus],
 };
 
+/** "Test key", "Remove" and the result, under a key field. */
+function KeyTestRow({
+  value,
+  test,
+  onRemove,
+  testId,
+}: {
+  value: string;
+  test: (key: string) => Promise<{ ok: boolean }>;
+  onRemove: () => void;
+  testId: string;
+}) {
+  const t = useTranslations("settings.ai");
+  const [testing, setTesting] = useState(false);
+  // The result belongs to the key that was tested (editing the key clears it).
+  const [result, setResult] = useState<{ key: string; ok: boolean } | null>(null);
+  const shown = result?.key === value ? result : null;
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <Button
+        type="button"
+        variant="secondary"
+        size="sm"
+        disabled={!value || testing}
+        data-testid={`${testId}-test`}
+        onClick={async () => {
+          setTesting(true);
+          const r = await test(value);
+          setResult({ key: value, ok: r.ok });
+          setTesting(false);
+        }}
+      >
+        {testing && <Loader2 className="animate-spin" />}
+        {testing ? t("testing") : t("test")}
+      </Button>
+      {value && (
+        <Button type="button" variant="ghost" size="sm" onClick={onRemove}>
+          {t("remove")}
+        </Button>
+      )}
+      {shown?.ok === true && (
+        <span className="flex items-center gap-1 text-sm text-success" data-testid={`${testId}-ok`}>
+          <CheckCircle2 className="size-4" /> {t("keyOk")}
+        </span>
+      )}
+      {shown?.ok === false && (
+        <span
+          className="flex items-center gap-1 text-sm text-destructive"
+          data-testid={`${testId}-bad`}
+        >
+          <XCircle className="size-4" /> {t("keyBad")}
+        </span>
+      )}
+    </div>
+  );
+}
+
 function ApiKeyField() {
   const t = useTranslations("settings.ai");
   const apiKey = useAiSettings((s) => s.apiKey);
   const update = useAiSettings((s) => s.update);
   const [visible, setVisible] = useState(false);
-  const [testing, setTesting] = useState(false);
-  const [result, setResult] = useState<"ok" | "bad" | null>(null);
 
   return (
     <div className="space-y-2">
@@ -112,10 +167,7 @@ function ApiKeyField() {
             dir="ltr"
             value={apiKey}
             placeholder={t("apiKeyPlaceholder")}
-            onChange={(e) => {
-              update({ apiKey: e.target.value.trim() });
-              setResult(null);
-            }}
+            onChange={(e) => update({ apiKey: e.target.value.trim() })}
             className="ps-9 font-mono"
           />
         </div>
@@ -129,38 +181,12 @@ function ApiKeyField() {
           {visible ? <EyeOff /> : <Eye />}
         </Button>
       </div>
-      <div className="flex flex-wrap items-center gap-2">
-        <Button
-          type="button"
-          variant="secondary"
-          size="sm"
-          disabled={!apiKey || testing}
-          onClick={async () => {
-            setTesting(true);
-            const r = await testApiKey(apiKey);
-            setResult(r.ok ? "ok" : "bad");
-            setTesting(false);
-          }}
-        >
-          {testing && <Loader2 className="animate-spin" />}
-          {testing ? t("testing") : t("test")}
-        </Button>
-        {apiKey && (
-          <Button type="button" variant="ghost" size="sm" onClick={() => update({ apiKey: "" })}>
-            {t("remove")}
-          </Button>
-        )}
-        {result === "ok" && (
-          <span className="flex items-center gap-1 text-sm text-success">
-            <CheckCircle2 className="size-4" /> {t("keyOk")}
-          </span>
-        )}
-        {result === "bad" && (
-          <span className="flex items-center gap-1 text-sm text-destructive">
-            <XCircle className="size-4" /> {t("keyBad")}
-          </span>
-        )}
-      </div>
+      <KeyTestRow
+        value={apiKey}
+        test={testApiKey}
+        onRemove={() => update({ apiKey: "" })}
+        testId="api-key"
+      />
       <a
         href="https://console.anthropic.com/settings/keys"
         target="_blank"
@@ -207,11 +233,20 @@ function GoogleKeyField() {
           {visible ? <EyeOff /> : <Eye />}
         </Button>
       </div>
-      {googleKey && (
-        <Button type="button" variant="ghost" size="sm" onClick={() => update({ googleKey: "" })}>
-          {t("remove")}
-        </Button>
-      )}
+      <KeyTestRow
+        value={googleKey}
+        test={testGoogleKey}
+        onRemove={() => update({ googleKey: "" })}
+        testId="google-key"
+      />
+      <a
+        href="https://aistudio.google.com/apikey"
+        target="_blank"
+        rel="noreferrer noopener"
+        className="inline-block text-xs text-primary underline-offset-4 hover:underline"
+      >
+        {t("getGoogleKey")}
+      </a>
     </div>
   );
 }

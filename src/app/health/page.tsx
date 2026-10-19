@@ -102,6 +102,13 @@ export default async function HealthPage() {
                   value={onOff(flags.pixabay)}
                   status={flags.pixabay ? "ok" : "off"}
                 />
+                <StatusRow label={t("accounts")} value={onOff(true)} status="ok" />
+                <StatusRow
+                  label={t("email")}
+                  value={onOff(flags.email)}
+                  status={flags.email ? "ok" : "off"}
+                  testId="feature-email"
+                />
                 <StatusRow
                   label={t("cloudSync")}
                   value={onOff(flags.cloudSync)}

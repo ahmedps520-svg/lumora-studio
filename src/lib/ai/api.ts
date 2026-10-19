@@ -215,6 +215,25 @@ export async function fetchAiStatus(): Promise<AiStatus | null> {
 }
 
 /** Checks a user's own key for free (looks up a model; no tokens are spent). */
+/** Checks the user's own Google AI key (free; nothing is generated). */
+export async function testGoogleKey(
+  googleKey: string,
+): Promise<{ ok: boolean; code?: AiErrorCode }> {
+  try {
+    const response = await fetch("/api/ai/test-google-key", {
+      method: "POST",
+      headers: { [GOOGLE_BYOK_HEADER]: googleKey.trim() },
+    });
+    if (response.ok) return { ok: true };
+    const data = (await response.json().catch(() => null)) as {
+      error?: { code: AiErrorCode };
+    } | null;
+    return { ok: false, code: data?.error?.code ?? "server_error" };
+  } catch {
+    return { ok: false, code: "server_error" };
+  }
+}
+
 export async function testApiKey(apiKey: string): Promise<{ ok: boolean; code?: AiErrorCode }> {
   try {
     const response = await fetch("/api/ai/test-key", {

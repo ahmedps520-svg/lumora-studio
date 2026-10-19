@@ -2,6 +2,7 @@ import { Activity, ArrowLeft } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
+import { LogIn, UserRound } from "lucide-react";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { Card } from "@/components/settings/ai-settings";
 import { SettingsTabs } from "@/components/settings/settings-tabs";
@@ -9,6 +10,7 @@ import { isSettingsTab } from "@/components/settings/tabs";
 import { SiteHeader } from "@/components/site-header";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
+import { currentUser } from "@/lib/auth/session";
 import { APP_NAME, APP_VERSION } from "@/lib/config";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -23,7 +25,9 @@ export default async function SettingsPage({
 }) {
   const t = await getTranslations("settings");
   const { tab } = await searchParams;
+  const ta = await getTranslations("auth");
   const version = t("about.version", { version: APP_VERSION });
+  const user = await currentUser();
 
   const general = (
     <>
@@ -35,6 +39,31 @@ export default async function SettingsPage({
           <span className="flex items-center gap-2">
             {t("general.theme")} <ThemeToggle />
           </span>
+        </div>
+      </Card>
+      <Card title={t("account.title")}>
+        <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
+          <p className="text-muted-foreground" data-testid="settings-account">
+            {user ? ta("signedInAs", { email: user.email }) : t("account.signedOut")}
+          </p>
+          {user ? (
+            <Button asChild variant="outline" size="sm">
+              <Link href="/account">
+                <UserRound /> {t("account.manage")}
+              </Link>
+            </Button>
+          ) : (
+            <div className="flex gap-2">
+              <Button asChild variant="outline" size="sm">
+                <Link href="/login?next=/settings">
+                  <LogIn className="rtl:-scale-x-100" /> {ta("login")}
+                </Link>
+              </Button>
+              <Button asChild variant="brand" size="sm">
+                <Link href="/signup">{ta("signup")}</Link>
+              </Button>
+            </div>
+          )}
         </div>
       </Card>
       <Card title={t("about.title")}>
