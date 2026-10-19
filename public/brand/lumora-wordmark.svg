@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 64" width="300" height="64">
+  <defs>
+  <linearGradient id="g" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+    <stop offset="0" stop-color="#FF7A3D"/>
+    <stop offset="1" stop-color="#F72585"/>
+  </linearGradient></defs>
+  <rect width="64" height="64" rx="16" fill="url(#g)"/>
+  <g transform="translate(-6 1.5)" fill="#fff">
+  <path d="M20 14h9v27h17v9H24a4 4 0 0 1-4-4z"/>
+  <path d="M45 11c1.2 7.2 3.8 9.8 11 11-7.2 1.2-9.8 3.8-11 11-1.2-7.2-3.8-9.8-11-11 7.2-1.2 9.8-3.8 11-11z"/>
+  <circle cx="54" cy="35" r="2" opacity="0.85"/></g>
+  <text x="80" y="43" font-family="Sora, Inter, 'Segoe UI', sans-serif" font-size="32" font-weight="600" fill="#0F172A" letter-spacing="-0.5">Lumora<tspan font-weight="400" fill="#64748B"> Studio</tspan></text>
+</svg>

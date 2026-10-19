@@ -1,0 +1,5 @@
+# Keep LF line endings everywhere (Prettier checks for them), even on Windows.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.ico binary
