@@ -10,6 +10,7 @@ vi.hoisted(() => {
 const { getAuth } = await import("@/lib/auth/server");
 const { setEmailTransport } = await import("@/lib/email/send");
 const { emailLocale, renderEmail } = await import("@/lib/email/templates");
+const { describeDevice } = await import("@/lib/email/device");
 type EmailMessage = Parameters<Parameters<typeof setEmailTransport>[0] & object>[0];
 
 const inbox: EmailMessage[] = [];
@@ -68,8 +69,37 @@ describe("accounts", () => {
     const res = await auth.handler(new Request(lastLink("verify")));
     expect(res.status).toBeLessThan(400);
     expect(inbox.some((m) => m.kind === "welcome")).toBe(true);
+    // Confirming signs in too, but that's what the welcome email is for.
+    expect(inbox.some((m) => m.kind === "signIn")).toBe(false);
     expect((await signIn(email, password)).status).toBe(200);
     expect((await signIn(email, "wrong password")).status).toBe(401);
+  });
+
+  it("emails a notice on every log-in, naming the device", async () => {
+    const auth = await getAuth();
+    const before = inbox.filter((m) => m.kind === "signIn").length;
+    const res = await auth.handler(
+      new Request("http://localhost:3000/api/auth/sign-in/email", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          origin: "http://localhost:3000",
+          "user-agent":
+            "Mozilla/5.0 (iPad; CPU OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1",
+        },
+        body: JSON.stringify({ email, password }),
+      }),
+    );
+    expect(res.status).toBe(200);
+    const notices = inbox.filter((m) => m.kind === "signIn");
+    expect(notices.length).toBe(before + 1);
+    const notice = notices.at(-1)!;
+    expect(notice.to).toBe(email);
+    expect(notice.text).toContain("Safari on iPad");
+    expect(lastLink("signIn")).toBe("http://localhost:3000/forgot-password");
+    // A wrong password sends nothing.
+    await signIn(email, "wrong password");
+    expect(inbox.filter((m) => m.kind === "signIn").length).toBe(before + 1);
   });
 
   it("resets a forgotten password with the emailed link", async () => {
@@ -144,14 +174,36 @@ describe("account emails", () => {
     expect(text).toContain("Emails are working");
   });
 
+  it("name the device a sign-in came from", () => {
+    expect(
+      describeDevice(
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0 Safari/537.36 Edg/141.0",
+      ),
+    ).toEqual({ browser: "Edge", os: "Windows" });
+    expect(
+      describeDevice(
+        "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/141.0 Mobile/15E148 Safari/604.1",
+      ),
+    ).toEqual({ browser: "Chrome", os: "iPhone" });
+    expect(describeDevice(null)).toBeNull();
+    const ar = renderEmail("signIn", "ar", {
+      email: "dina@example.com",
+      userAgent:
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_0) AppleWebKit/605.1.15 Safari/605.1.15",
+    });
+    expect(ar.text).toContain("Safari على Mac");
+    expect(renderEmail("signIn", "en").text).toContain("Unknown device");
+  });
+
   it("carry the logo inline and show the account details on security emails", () => {
     const mail = renderEmail("passwordChanged", "ar", {
       email: "dina@example.com",
       url: "https://lumora.example/forgot-password",
       when: new Date("2026-10-19T08:30:00Z"),
     });
-    expect(mail.attachments[0]!.contentId).toBe("lumora-logo");
+    expect(mail.attachments.map((a) => a.contentId)).toEqual(["lumora-logo", "lumora-art"]);
     expect(mail.html).toContain("cid:lumora-logo");
+    expect(mail.html).toContain("cid:lumora-art");
     expect(mail.html).toContain("dina@example.com");
     expect(mail.html).toContain('dir="rtl"');
     // Western digits, like the rest of the app.

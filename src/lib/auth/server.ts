@@ -1,7 +1,7 @@
 import "server-only";
 /**
- * Accounts: email + password sign-up with email confirmation, log in, and
- * password reset, using Better Auth (https://better-auth.com). Accounts are
+ * Accounts: email + password sign-up with email confirmation, log in (each
+ * one reported by email), and password reset, using Better Auth (https://better-auth.com). Accounts are
  * stored in a SQLite file (Node's built-in driver) — `.data/lumora.db` by
  * default — and the tables are created on first use. Passwords are hashed
  * with scrypt; sessions are signed, HTTP-only cookies.
@@ -15,7 +15,7 @@ import { createAuthMiddleware, isAPIError } from "better-auth/api";
 import { getMigrations } from "better-auth/db/migration";
 import { nextCookies } from "better-auth/next-js";
 import { sendEmail } from "@/lib/email/send";
-import { emailLocale, renderEmail, type EmailKind } from "@/lib/email/templates";
+import { emailLocale, renderEmail, type EmailData, type EmailKind } from "@/lib/email/templates";
 import { getServerEnv } from "@/lib/env";
 
 const DATA_DIR = path.join(process.cwd(), ".data");
@@ -55,6 +55,7 @@ async function mail(
   user: { email: string; name?: string | null },
   url: string | undefined,
   request?: Request,
+  extra: Partial<EmailData> = {},
 ) {
   const site = siteUrl(request);
   const { subject, html, text, attachments } = renderEmail(kind, emailLocale(request), {
@@ -63,6 +64,7 @@ async function mail(
     siteUrl: site,
     email: user.email,
     when: new Date(),
+    ...extra,
   });
   await sendEmail({ to: user.email, subject, html, text, kind, attachments });
 }
@@ -75,6 +77,18 @@ async function passwordChanged(user: { email: string; name?: string | null }, re
   } catch (error) {
     // The password is already changed; a failed notice must not undo that.
     console.error("[auth] Couldn't send the password-changed email:", (error as Error).name);
+  }
+}
+
+/** "You just signed in" — when and on what device, with a way to lock everyone else out. */
+async function signedIn(user: { email: string; name?: string | null }, request?: Request) {
+  const site = siteUrl(request);
+  try {
+    await mail("signIn", user, site ? `${site}/forgot-password` : undefined, request, {
+      userAgent: request?.headers.get("user-agent"),
+    });
+  } catch (error) {
+    console.error("[auth] Couldn't send the sign-in email:", (error as Error).name);
   }
 }
 
@@ -103,11 +117,19 @@ export function authOptions(database: DatabaseSync): BetterAuthOptions {
       afterEmailVerification: (user, request) => mail("welcome", user, siteUrl(request), request),
     },
     hooks: {
-      // A changed password (from the Account page) is confirmed by email.
       after: createAuthMiddleware(async (ctx) => {
-        if (ctx.path !== "/change-password" || isAPIError(ctx.context.returned)) return;
-        const user = ctx.context.session?.user;
-        if (user) await passwordChanged(user, ctx.request);
+        if (isAPIError(ctx.context.returned)) return;
+        // A changed password (from the Account page) is confirmed by email.
+        if (ctx.path === "/change-password") {
+          const user = ctx.context.session?.user;
+          if (user) await passwordChanged(user, ctx.request);
+        }
+        // Every log-in is reported by email. Not awaited: the email must never slow
+        // logging in down (confirming an email signs in too, but sends a welcome instead).
+        if (ctx.path === "/sign-in/email") {
+          const user = ctx.context.newSession?.user;
+          if (user) void signedIn(user, ctx.request);
+        }
       }),
     },
     // Must be last: lets server actions set the session cookie.

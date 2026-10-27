@@ -5,6 +5,23 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+## [0.14.0] — 2026-10-27 — Sign-in emails and brighter account emails
+
+### Added
+
+- **A "new sign-in" email every time you log in**: when it happened, the device and browser
+  (for example "Safari on iPad"), and a **Secure my account** button in case it wasn't you
+  (resetting the password signs every other device out). It's sent in the background, so
+  logging in is never slowed down. Confirming your email still sends the welcome email instead.
+
+### Changed
+
+- **Account emails redesigned** around Lumora's light: each one opens with a glowing header
+  picture (a warm dawn, rays and sparks around a glass badge with the email's icon — an envelope,
+  sparkles, a key, a shield or devices), then a sparked label, a bigger headline, a pill button
+  with a soft glow and a cleaner details card. English and Arabic, in Gmail, Apple Mail and
+  Outlook; the pictures travel with the email, so they show without loading anything.
+
 ## [0.13.0] — 2026-10-24 — A brighter website
 
 ### Changed

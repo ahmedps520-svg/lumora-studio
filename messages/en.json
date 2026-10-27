@@ -1255,6 +1255,20 @@
       "eyebrow": "Test email",
       "title": "Emails are working",
       "body": "This test was sent from your Lumora Studio account page. Confirmation, welcome and password emails will look just like this."
+    },
+    "signIn": {
+      "subject": "New sign-in to your Lumora Studio account",
+      "preheader": "Was this you? Here’s when and where.",
+      "eyebrow": "New sign-in",
+      "title": "You just signed in",
+      "body": "Your Lumora Studio account was just signed in to. If this was you, there’s nothing else to do — welcome back.",
+      "account": "Account",
+      "when": "When",
+      "device": "Device",
+      "deviceOn": "{browser} on {os}",
+      "unknownDevice": "Unknown device",
+      "action": "Secure my account",
+      "note": "Didn’t sign in? Reset your password right away — that signs every other device out of your account."
     }
   },
   "auth": {

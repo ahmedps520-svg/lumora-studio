@@ -2,7 +2,7 @@ import { renderEmail, type EmailKind } from "@/lib/email/templates";
 
 export const runtime = "nodejs";
 
-const KINDS: EmailKind[] = ["verify", "welcome", "reset", "passwordChanged", "test"];
+const KINDS: EmailKind[] = ["verify", "welcome", "reset", "passwordChanged", "signIn", "test"];
 
 /**
  * Development only: shows each account email as it will arrive, with sample
@@ -31,10 +31,14 @@ export async function GET(request: Request) {
     siteUrl: url.origin,
     email: "dina@example.com",
     when: new Date(),
+    userAgent: request.headers.get("user-agent"),
   });
   // Inline images as data: URLs, since a browser can't read cid: links.
   let html = sample.html;
   for (const a of sample.attachments)
-    html = html.replaceAll(`cid:${a.contentId}`, `data:image/png;base64,${a.content}`);
+    html = html.replaceAll(
+      `cid:${a.contentId}`,
+      `data:image/${a.filename.endsWith(".jpg") ? "jpeg" : "png"};base64,${a.content}`,
+    );
   return new Response(html, { headers });
 }
