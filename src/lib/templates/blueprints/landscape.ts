@@ -305,12 +305,14 @@ export function promoWide(k: Kit) {
   k.text(c.body || c.subtitle, { x, y, w, size: 4.2 * u, color: p.soft });
   const ctaW = k.pill(c.cta, x, ctaY, { size: 4 * u, fill: p.primary });
   const info = c.handle || detailLine(k);
-  if (info)
+  const infoW = w - ctaW - 4 * u;
+  if (info && infoW > 12 * u)
     k.text(info, {
       x: x + ctaW + 4 * u,
       y: ctaY + 2.8 * u,
-      w: w - ctaW - 4 * u,
-      size: 3.4 * u,
+      w: infoW,
+      // One line beside the button, whatever the font.
+      size: k.fit(info, { w: infoW, max: 3.4 * u, min: 2.2 * u, lines: 1, font: "b" }),
       color: p.soft,
       weight: 700,
     });
@@ -388,7 +390,7 @@ export function bannerWide(k: Kit) {
       x,
       y: H - m * 0.7 - 6 * u,
       w,
-      size: 6 * u,
+      size: k.fit(c.handle, { w, max: 6 * u, min: 3 * u, lines: 1, font: "b" }),
       color: on,
       weight: 700,
       opacity: 0.85,

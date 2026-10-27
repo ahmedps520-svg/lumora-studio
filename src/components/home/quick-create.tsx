@@ -3,6 +3,7 @@
 import { ArrowUpRight } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { formatFromPreset, getPreset, pxToUnit, type FormatPreset } from "@/lib/document/formats";
+import { SectionHeading } from "@/components/site/section-heading";
 import { PresetPreview, PreviewStage } from "./preset-preview";
 import { useCreateDesign } from "./use-create-design";
 
@@ -44,7 +45,7 @@ export function FormatCard({
       disabled={disabled}
       onClick={onCreate}
       data-testid={compact ? `preset-${preset.id}` : `quick-${preset.id}`}
-      className="group relative flex flex-col rounded-2xl surface-card p-2 text-start transition-all duration-200 hover:-translate-y-1 hover:border-transparent hover:shadow-lifted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-60"
+      className="group lumen flex flex-col rounded-2xl surface-lit p-2 text-start transition-transform duration-300 hover:-translate-y-1 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-60"
     >
       <span
         className={`relative flex items-center justify-center overflow-hidden rounded-xl bg-surface-2 ${compact ? "aspect-[16/10] p-4" : "aspect-[4/3] p-6"}`}
@@ -80,16 +81,12 @@ export function QuickCreate() {
 
   return (
     <section id="sizes" aria-labelledby="sizes-heading" className="scroll-mt-24">
-      <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
-            {t("sizesEyebrow")}
-          </p>
-          <h2 id="sizes-heading" className="mt-2 text-2xl font-semibold sm:text-3xl">
-            {t("popular")}
-          </h2>
-        </div>
-      </div>
+      <SectionHeading
+        id="sizes-heading"
+        eyebrow={t("sizesEyebrow")}
+        title={t("popular")}
+        lead={t("sizesLead")}
+      />
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
         {POPULAR.map((id, i) => {
           const preset = getPreset(id)!;

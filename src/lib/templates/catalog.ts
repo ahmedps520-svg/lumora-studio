@@ -1,8 +1,10 @@
 /**
  * The template catalogue: every built-in template, as (kind × theme ×
  * blueprint × palette × fonts). Each theme gets different layouts in each
- * kind, and blueprints only go to themes whose words they suit.
+ * kind, blueprints only go to themes whose words they suit, and every
+ * (kind, theme, layout) comes in a few colour-and-font variants.
  */
+import { GEN_BY_ID } from "./blueprints";
 import { getTheme, THEMES } from "./content";
 import type { Copy, TemplateDef, TemplateKind, Theme } from "./types";
 
@@ -24,16 +26,17 @@ const NEEDS: Record<string, Need> = {
   quoteWide: (c) => Boolean(c.quote),
 };
 
-const suits = (blueprint: string, theme: Theme) => {
-  const need = NEEDS[blueprint];
+/** True when a layout's word needs are met by a theme (in both languages). */
+export function suits(blueprint: string, theme: Theme): boolean {
+  const need = NEEDS[blueprint] ?? GEN_BY_ID.get(blueprint)?.needs;
   return need ? need(theme.copy.en) && need(theme.copy.ar) : true;
-};
+}
 
 interface KindPlan {
   blueprints: string[];
   /** Theme ids, or "all". */
   themes: string[] | "all";
-  /** Templates per theme. */
+  /** Layouts per theme. */
   perTheme: number;
 }
 
@@ -83,8 +86,16 @@ const LANDSCAPE = [
 
 const words = (s: string) => s.split(/\s+/).filter(Boolean);
 
+/** The sizes every theme gets; the others are chosen per theme. */
+export const ALL_THEME_KINDS: TemplateKind[] = [
+  "instagramPost",
+  "instagramStory",
+  "instagramPortrait",
+  "facebookPost",
+];
+
 export const KIND_PLANS: Partial<Record<TemplateKind, KindPlan>> = {
-  instagramPost: { blueprints: [...PHOTO, ...SOCIAL], themes: "all", perTheme: 6 },
+  instagramPost: { blueprints: [...PHOTO, ...SOCIAL], themes: "all", perTheme: 8 },
   instagramStory: {
     blueprints: [
       ...PHOTO,
@@ -104,10 +115,10 @@ export const KIND_PLANS: Partial<Record<TemplateKind, KindPlan>> = {
       "collage",
     ],
     themes: "all",
-    perTheme: 4,
+    perTheme: 6,
   },
-  instagramPortrait: { blueprints: [...PHOTO, ...SOCIAL], themes: "all", perTheme: 2 },
-  facebookPost: { blueprints: LANDSCAPE, themes: "all", perTheme: 2 },
+  instagramPortrait: { blueprints: [...PHOTO, ...SOCIAL], themes: "all", perTheme: 4 },
+  facebookPost: { blueprints: LANDSCAPE, themes: "all", perTheme: 3 },
   poster: {
     blueprints: [
       "spotlight",
@@ -132,7 +143,7 @@ export const KIND_PLANS: Partial<Record<TemplateKind, KindPlan>> = {
       camping beachHoliday cityBreak summerVibes mentalHealth scienceFair languageClass
       backToSchool cyberSecurity nationalDay halloween womensDay mothersDay fathersDay ramadan eid
       musicRelease bookLaunch fitnessChallenge streamSchedule startupPitch hiring birthday`),
-    perTheme: 2,
+    perTheme: 3,
   },
   flyer: {
     blueprints: [
@@ -156,7 +167,7 @@ export const KIND_PLANS: Partial<Record<TemplateKind, KindPlan>> = {
       beachHoliday luxuryHotel consulting lawFirm languageClass backToSchool scienceFair
       potteryClass grandOpening networking techSummit artExhibition halloween mothersDay
       fathersDay iftar ramadan fitnessChallenge finance eco`),
-    perTheme: 2,
+    perTheme: 3,
   },
   pinterestPin: {
     blueprints: [
@@ -176,7 +187,7 @@ export const KIND_PLANS: Partial<Record<TemplateKind, KindPlan>> = {
       beauty beautyTutorial fitnessChallenge bookLaunch bookClub musicRelease tutorial vlog
       podcast realEstate pets eco finance course backToSchool kidsWorkshop summerVibes womensDay
       newArrivals sneakers`),
-    perTheme: 2,
+    perTheme: 3,
   },
   invitation: {
     blueprints: [
@@ -193,7 +204,7 @@ export const KIND_PLANS: Partial<Record<TemplateKind, KindPlan>> = {
       words(`birthday wedding babyShower graduation iftar newYear valentine bookClub engagement
       gala artExhibition grandOpening filmNight networking summerVibes halloween mothersDay eid
       potteryClass bookLaunch`),
-    perTheme: 3,
+    perTheme: 4,
   },
   youtubeThumbnail: {
     blueprints: ["ytPunch", "ytSplit", "ytNumber", "ytVersus", "wideCenter", "widePhoto"],
@@ -203,7 +214,7 @@ export const KIND_PLANS: Partial<Record<TemplateKind, KindPlan>> = {
       beautyTutorial streamSchedule cyberSecurity electronics sneakers pizza sushi shawarma
       hiking camping cityBreak beachHoliday startupPitch marketReport languageClass scienceFair
       football halloween interiorDesign carService mentalHealth skincare`),
-    perTheme: 3,
+    perTheme: 4,
   },
   xPost: {
     blueprints: [...LANDSCAPE, "ytPunch", "ytNumber"],
@@ -212,7 +223,7 @@ export const KIND_PLANS: Partial<Record<TemplateKind, KindPlan>> = {
       course podcast musicRelease bookLaunch streamSchedule football filmNight newYear
       nationalDay ramadan eid womensDay electronics ecommerce testimonial newTeamMember travel
       cityBreak coffee pizza eco charity`),
-    perTheme: 1,
+    perTheme: 2,
   },
   linkedinPost: {
     blueprints: LANDSCAPE,
@@ -221,7 +232,7 @@ export const KIND_PLANS: Partial<Record<TemplateKind, KindPlan>> = {
       cyberSecurity productLaunch ecommerce tips quote photography realEstate interiorDesign
       charity eco womensDay nationalDay graduation podcast bookLaunch grandOpening gala
       mentalHealth dentist carService luxuryHotel furniture electronics ramadan`),
-    perTheme: 1,
+    perTheme: 2,
   },
   linkedinBanner: {
     blueprints: ["bannerWide", "bannerPhoto"],
@@ -258,20 +269,20 @@ export const KIND_PLANS: Partial<Record<TemplateKind, KindPlan>> = {
     themes: words(`photography agency realEstate coffee beauty yoga fitness hiring course appPromo
       burger bakery consulting lawFirm dentist barber interiorDesign florist carService cleaning
       jewelry startupPitch gardening languageClass`),
-    perTheme: 2,
+    perTheme: 3,
   },
   logo: {
     blueprints: ["logoBadge", "logoMonogram", "logoRing", "logoWordmark", "logoStamp"],
     themes: words(`coffee bakery burger healthyFood fitness yoga beauty pets photography agency
       appPromo aiTool travel eco realEstate kidsWorkshop pizza sushi iceCream juiceBar shawarma
       brunch barber florist jewelry perfume sneakers furniture grocery carService`),
-    perTheme: 2,
+    perTheme: 3,
   },
   certificate: {
     blueprints: ["certClassic", "certModern", "certRibbon"],
     themes: words(`course marathon graduation kidsWorkshop charity scienceFair languageClass
       runningClub fitnessChallenge potteryClass techSummit`),
-    perTheme: 2,
+    perTheme: 3,
   },
   menu: {
     blueprints: ["menuClassic", "menuModern"],
@@ -284,20 +295,69 @@ export const KIND_PLANS: Partial<Record<TemplateKind, KindPlan>> = {
     themes: words(
       `hiring photography agency course consulting lawFirm interiorDesign newTeamMember`,
     ),
-    perTheme: 1,
+    perTheme: 2,
   },
 };
+
+/** Colour-and-font variants of every (kind, theme, layout). */
+export const VARIANTS = 4;
+
+/** The layouts a kind uses: its plan's, plus generated layouts made for it. */
+export function blueprintsForKind(kind: TemplateKind): string[] {
+  const plan = KIND_PLANS[kind];
+  if (!plan) return [];
+  const extra = [...GEN_BY_ID.values()].filter((b) => b.kinds.includes(kind)).map((b) => b.id);
+  return [...plan.blueprints, ...extra.filter((id) => !plan.blueprints.includes(id))];
+}
+
+/** The themes a kind is made for: its plan's list, plus themes that opt in. */
+export function themesForKind(kind: TemplateKind): Theme[] {
+  const plan = KIND_PLANS[kind];
+  if (!plan) return [];
+  if (plan.themes === "all") return THEMES;
+  const listed = new Set(plan.themes);
+  return [
+    ...plan.themes.map(getTheme),
+    ...THEMES.filter((t) => !listed.has(t.id) && t.kinds?.includes(kind)),
+  ];
+}
+
+/**
+ * The palette-and-font pairs of a theme for one (kind, pick), the first
+ * being the original choice; each of the others changes the palette and
+ * the font, so variants look as different as possible.
+ */
+function variantPairs(theme: Theme, ti: number, j: number, ki: number) {
+  const P = theme.palettes.length;
+  const F = theme.fonts.length;
+  const combos = P * F;
+  const p0 = (ti + j + ki) % P;
+  const f0 = (ti + j * 2 + ki) % F;
+  const count = Math.min(VARIANTS, combos);
+  // A new palette for each variant (and a new font as well), until every palette is used.
+  const order = new Set<number>();
+  for (let t = 0; order.size < count && t < combos * 2; t++)
+    order.add(((f0 + t + Math.floor(t / P)) % F) * P + ((p0 + t) % P));
+  for (let key = 0; order.size < count; key++) order.add(key);
+  return [...order].map((key) => ({
+    palette: theme.palettes[key % P]!,
+    fonts: theme.fonts[Math.floor(key / P)]!,
+  }));
+}
 
 /** Builds the catalogue (stable order and ids). */
 export function buildCatalog(): TemplateDef[] {
   const defs: TemplateDef[] = [];
-  const plans = Object.entries(KIND_PLANS) as [TemplateKind, KindPlan][];
-  plans.forEach(([kind, plan], ki) => {
-    const themes = plan.themes === "all" ? THEMES : plan.themes.map(getTheme);
+  const seen = new Set<string>();
+  const plans = Object.keys(KIND_PLANS) as TemplateKind[];
+  plans.forEach((kind, ki) => {
+    const plan = KIND_PLANS[kind]!;
+    const blueprints = blueprintsForKind(kind);
+    const themes = themesForKind(kind);
     // Each layout is used about equally often in a kind.
-    const used = new Map<string, number>(plan.blueprints.map((b) => [b, 0]));
+    const used = new Map<string, number>(blueprints.map((b) => [b, 0]));
     themes.forEach((theme, ti) => {
-      const options = plan.blueprints.filter((b) => suits(b, theme));
+      const options = blueprints.filter((b) => suits(b, theme));
       const picked: string[] = [];
       for (let j = 0; j < Math.min(plan.perTheme, options.length); j++) {
         const blueprint = options
@@ -306,17 +366,20 @@ export function buildCatalog(): TemplateDef[] {
           .sort((x, y) => x.score - y.score)[0]!.b;
         picked.push(blueprint);
         used.set(blueprint, used.get(blueprint)! + 1);
-        const id = `${kind}-${theme.id}-${blueprint}`;
-        if (defs.some((d) => d.id === id)) continue;
-        defs.push({
-          id,
-          kind,
-          theme: theme.id,
-          category: theme.category,
-          blueprint,
-          // Shifted by kind, so a theme looks different in each size.
-          palette: theme.palettes[(ti + j + ki) % theme.palettes.length]!,
-          fonts: theme.fonts[(ti + j * 2 + ki) % theme.fonts.length]!,
+        const base = `${kind}-${theme.id}-${blueprint}`;
+        variantPairs(theme, ti, j, ki).forEach((pair, v) => {
+          const id = v === 0 ? base : `${base}-${v + 1}`;
+          if (seen.has(id)) return;
+          seen.add(id);
+          defs.push({
+            id,
+            kind,
+            theme: theme.id,
+            category: theme.category,
+            blueprint,
+            palette: pair.palette,
+            fonts: pair.fonts,
+          });
         });
       }
     });
@@ -325,10 +388,19 @@ export function buildCatalog(): TemplateDef[] {
 }
 
 let cached: TemplateDef[] | null = null;
+let byId: Map<string, TemplateDef> | null = null;
+
 export function catalog(): TemplateDef[] {
   return (cached ??= buildCatalog());
 }
 
+/** Forgets the built catalogue (after themes or layouts were added). */
+export function resetCatalog() {
+  cached = null;
+  byId = null;
+}
+
 export function getTemplateDef(id: string): TemplateDef | undefined {
-  return catalog().find((d) => d.id === id);
+  byId ??= new Map(catalog().map((d) => [d.id, d]));
+  return byId.get(id);
 }

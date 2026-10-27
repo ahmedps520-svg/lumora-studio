@@ -8,6 +8,8 @@
  * - assets:    uploaded images as Blobs (referenced from designs as `asset:<id>`)
  * - folders:   dashboard folders
  * - kv:        small settings
+ * - photos:    photo-editor documents (metadata for lists)
+ * - photoData: a photo document's layers (settings + PNG blobs)
  */
 import Dexie, { type EntityTable } from "dexie";
 
@@ -60,6 +62,26 @@ export interface FolderRecord {
   createdAt: string;
 }
 
+export interface PhotoRecord {
+  id: string;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
+  width: number;
+  height: number;
+  layerCount: number;
+  thumbnail: string | null;
+  deletedAt: string | null;
+}
+
+export interface PhotoDataRecord {
+  id: string;
+  /** The document settings (PhotoDoc as JSON). */
+  doc: unknown;
+  /** Per layer: content PNG (pixel layers) and mask PNG. */
+  pixels: Record<string, { content: Blob | null; mask: Blob | null }>;
+}
+
 export interface KvRecord {
   key: string;
   value: unknown;
@@ -72,6 +94,8 @@ export class LumoraDB extends Dexie {
   assets!: EntityTable<AssetRecord, "id">;
   folders!: EntityTable<FolderRecord, "id">;
   kv!: EntityTable<KvRecord, "key">;
+  photos!: EntityTable<PhotoRecord, "id">;
+  photoData!: EntityTable<PhotoDataRecord, "id">;
 
   constructor(name = "lumora") {
     super(name);
@@ -82,6 +106,10 @@ export class LumoraDB extends Dexie {
       assets: "id, createdAt",
       folders: "id, name, createdAt",
       kv: "key",
+    });
+    this.version(2).stores({
+      photos: "id, updatedAt, createdAt, name, deletedAt",
+      photoData: "id",
     });
   }
 }

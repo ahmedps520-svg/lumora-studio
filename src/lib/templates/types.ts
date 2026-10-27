@@ -42,6 +42,12 @@ export const THEME_CATEGORIES = [
   "tech",
   "holidays",
   "creators",
+  "beauty",
+  "home",
+  "sports",
+  "travel",
+  "health",
+  "arts",
 ] as const;
 export type ThemeCategory = (typeof THEME_CATEGORIES)[number];
 
@@ -54,6 +60,11 @@ export interface Theme {
   fonts: FontPairId[];
   /** Photo topics that fill the theme's photo frames (the first is the main one). */
   photos: PhotoTopic[];
+  /**
+   * Sizes this theme suits besides the ones every theme gets (posts, stories,
+   * portrait posts, Facebook posts): posters, flyers, menus, résumés…
+   */
+  kinds?: TemplateKind[];
   copy: Record<TemplateLocale, Copy>;
 }
 

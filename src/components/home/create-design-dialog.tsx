@@ -127,11 +127,16 @@ export function CreateDesignDialog({ compact = false }: { compact?: boolean }) {
     <Dialog>
       <DialogTrigger asChild>
         {compact ? (
-          <Button variant="brand" size="sm" data-testid="create-design-compact">
+          <Button
+            variant="brand"
+            size="sm"
+            className="rounded-full px-3.5"
+            data-testid="create-design-compact"
+          >
             <Plus /> <span className="hidden sm:inline">{t("home.createShort")}</span>
           </Button>
         ) : (
-          <Button variant="brand" size="xl" data-testid="create-design">
+          <Button variant="brand" size="xl" className="rounded-full" data-testid="create-design">
             <Plus /> {t("home.createDesign")}
           </Button>
         )}

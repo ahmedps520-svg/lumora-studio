@@ -5,20 +5,52 @@ import {
   catalog,
   featuredTemplates,
   kindFormat,
+  LIBRARY_SIZE,
+  libraryLoaded,
+  loadTemplateLibrary,
   searchTemplates,
   shapeFamily,
   templatesForSize,
   TEMPLATE_KINDS,
+  type TemplateDef,
 } from "@/lib/templates";
-import { BLUEPRINTS } from "@/lib/templates/blueprints";
+import { BLUEPRINTS, GEN_BY_ID } from "@/lib/templates/blueprints";
+import { GENERATED_BLUEPRINTS } from "@/lib/templates/blueprints/gen";
 import { THEMES } from "@/lib/templates/content";
+import { GENERATED_THEMES } from "@/lib/templates/content/gen";
 import { ICON_SVG } from "@/lib/templates/icons.generated";
+
+// The built-in themes and layouts are there at once; the full library is a separate download.
+const builtIn = catalog().length;
+await loadTemplateLibrary();
+
+describe("template library", () => {
+  it("loads the generated themes and layouts on demand", () => {
+    expect(libraryLoaded()).toBe(true);
+    expect(catalog().length).toBeGreaterThan(builtIn * 3);
+    expect(GEN_BY_ID.size).toBe(GENERATED_BLUEPRINTS.length);
+  });
+
+  it("has unique theme and layout ids across all files", () => {
+    const themeIds = THEMES.map((t) => t.id);
+    expect(new Set(themeIds).size).toBe(themeIds.length);
+    expect(THEMES.length).toBe(themeIds.length);
+    for (const t of GENERATED_THEMES) expect(THEMES).toContain(t);
+    const layoutIds = GENERATED_BLUEPRINTS.map((b) => b.id);
+    expect(new Set(layoutIds).size).toBe(layoutIds.length);
+  });
+
+  it("is as big as the app says (shown as LIBRARY_SIZE+)", () => {
+    expect(catalog().length).toBeGreaterThanOrEqual(LIBRARY_SIZE);
+    expect(catalog().length).toBeLessThan(LIBRARY_SIZE * 1.1);
+  });
+});
 
 describe("template catalogue", () => {
   const defs = catalog();
 
   it("has thousands of templates with unique ids, in every kind", () => {
-    expect(defs.length).toBeGreaterThanOrEqual(2300);
+    expect(defs.length).toBeGreaterThanOrEqual(50_000);
     expect(new Set(defs.map((d) => d.id)).size).toBe(defs.length);
     for (const kind of TEMPLATE_KINDS) expect(defs.some((d) => d.kind === kind)).toBe(true);
     for (const d of defs) expect(BLUEPRINTS[d.blueprint]).toBeTruthy();
@@ -61,10 +93,33 @@ describe("template catalogue", () => {
 
 describe("built templates", () => {
   const defs = catalog();
+  // The whole catalogue is checked by `npx tsx scripts/check-templates.ts --all`; here a
+  // spread sample: every layout at every size it appears in, with varied themes and variants.
+  const sample = (() => {
+    const perKey = new Map<string, TemplateDef[]>();
+    for (const d of defs) {
+      const key = `${d.kind}|${d.blueprint}`;
+      const list = perKey.get(key);
+      if (list) list.push(d);
+      else perKey.set(key, [d]);
+    }
+    // Up to four per layout and size, spread over its themes.
+    const out: TemplateDef[] = [];
+    for (const list of perKey.values()) {
+      const step = Math.max(1, Math.floor(list.length / 4));
+      for (let i = 0; i < list.length && i < step * 4; i += step) out.push(list[i]!);
+    }
+    return out;
+  })();
+
+  it("samples every layout in every size", () => {
+    const keys = new Set(defs.map((d) => `${d.kind}|${d.blueprint}`));
+    expect(new Set(sample.map((d) => `${d.kind}|${d.blueprint}`)).size).toBe(keys.size);
+  });
 
   it.each(["en", "ar"] as const)("build valid pages that stay on the page (%s)", (locale) => {
     const problems: string[] = [];
-    for (const def of defs) {
+    for (const def of sample) {
       const built = buildTemplate(def, locale);
       const { width: W, height: H } = built.format;
       expect(built.pages.length).toBeGreaterThan(0);

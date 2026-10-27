@@ -6,7 +6,7 @@ import { createId } from "@/lib/id";
 import { PEOPLE_TOPICS, topicPhotos, type StockPhoto } from "@/lib/photos";
 import { formatFromPreset, getPreset } from "@/lib/document/formats";
 import { ElementSchema, PageSchema, type ElementInput, type Format, type Page } from "@/lib/schema";
-import { BLUEPRINTS } from "./blueprints";
+import { BLUEPRINTS, type Blueprint } from "./blueprints";
 import { getTheme } from "./content";
 import { FONT_PAIRS } from "./fonts";
 import { Kit, seeded, type PhotoPicker } from "./kit";
@@ -62,17 +62,28 @@ function photoPicker(topics: Theme["photos"], seed: string): PhotoPicker {
   };
 }
 
+const names = new Map<string, string>();
+
+/** A template's name: its theme's title on one line (cached; the gallery asks a lot). */
 export function templateName(def: TemplateDef, locale: TemplateLocale): string {
-  return getTheme(def.theme).copy[locale].title.replace(/\n/g, " ");
+  const key = `${def.theme}:${locale}`;
+  let name = names.get(key);
+  if (name === undefined) {
+    name = getTheme(def.theme).copy[locale].title.replace(/\n/g, " ");
+    names.set(key, name);
+  }
+  return name;
 }
 
 export function buildTemplate(
   def: TemplateDef,
   locale: TemplateLocale,
   size?: Format,
+  /** A theme or layout that isn't registered yet (the authoring checks). */
+  overrides: { theme?: Theme; blueprint?: Blueprint } = {},
 ): BuiltTemplate {
-  const theme = getTheme(def.theme);
-  const blueprint = BLUEPRINTS[def.blueprint];
+  const theme = overrides.theme ?? getTheme(def.theme);
+  const blueprint = overrides.blueprint ?? BLUEPRINTS[def.blueprint];
   if (!blueprint) throw new Error(`Unknown blueprint: ${def.blueprint}`);
   const format = size ?? kindFormat(def.kind);
   const { width: W, height: H } = format;
@@ -104,5 +115,5 @@ export function buildTemplate(
       elements: kit.els.map((el) => ElementSchema.parse(locale === "ar" ? mirror(el, W) : el)),
     }),
   );
-  return { name: templateName(def, locale), format, pages };
+  return { name: theme.copy[locale].title.replace(/\n/g, " "), format, pages };
 }

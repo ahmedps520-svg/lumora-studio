@@ -51,9 +51,15 @@
   --canvas-dots: rgb(15 15 30 / 0.09);
   --snap-guide: #f72585;
 
-  --glow-1: rgb(255 122 61 / 0.22);
-  --glow-2: rgb(247 37 133 / 0.16);
-  --glow-3: rgb(124 108 242 / 0.18);
+  /* Light — Lumora's signature (see "Light" below). */
+  --lumen-1: rgb(255 122 61 / 0.42);
+  --lumen-2: rgb(247 37 133 / 0.26);
+  --lumen-3: rgb(124 108 242 / 0.2);
+  --lumen-ray: rgb(255 122 61 / 0.14);
+  --lumen-rim: rgb(247 37 133 / 0.6);
+  --lumen-wash: rgb(255 122 61 / 0.07);
+  --text-glow: rgb(247 37 133 / 0.22);
+  --deep-shadow: 0 1px 2px rgb(10 10 20 / 0.04), 0 30px 60px -34px rgb(40 20 60 / 0.35);
 
   --chart-1: #ff7a3d;
   --chart-2: #f72585;
@@ -91,9 +97,14 @@
   --canvas-backdrop: #0d0e14;
   --canvas-dots: rgb(255 255 255 / 0.07);
 
-  --glow-1: rgb(255 122 61 / 0.18);
-  --glow-2: rgb(247 37 133 / 0.16);
-  --glow-3: rgb(124 108 242 / 0.2);
+  --lumen-1: rgb(255 122 61 / 0.5);
+  --lumen-2: rgb(247 37 133 / 0.34);
+  --lumen-3: rgb(124 108 242 / 0.3);
+  --lumen-ray: rgb(255 160 120 / 0.1);
+  --lumen-rim: rgb(255 122 61 / 0.8);
+  --lumen-wash: rgb(247 37 133 / 0.1);
+  --text-glow: rgb(247 37 133 / 0.45);
+  --deep-shadow: 0 1px 2px rgb(0 0 0 / 0.2), 0 30px 70px -32px rgb(0 0 0 / 0.75);
 }
 
 @theme inline {
@@ -148,6 +159,7 @@
   --shadow-soft: 0 1px 2px rgb(10 10 20 / 0.05), 0 8px 24px -6px rgb(10 10 20 / 0.1);
   --shadow-lifted: 0 2px 6px rgb(10 10 20 / 0.06), 0 24px 48px -12px rgb(10 10 20 / 0.22);
   --shadow-glow: 0 10px 40px -10px rgb(247 37 133 / 0.55), 0 4px 14px -4px rgb(255 122 61 / 0.4);
+  --shadow-deep: var(--deep-shadow);
 
   --default-transition-duration: 180ms;
   --default-transition-timing-function: cubic-bezier(0.2, 0, 0, 1);
@@ -155,6 +167,9 @@
   --animate-float: float 7s ease-in-out infinite;
   --animate-float-slow: float 9s ease-in-out infinite;
   --animate-fade-up: fade-up 0.6s cubic-bezier(0.2, 0, 0, 1) both;
+  --animate-twinkle: twinkle 3.6s ease-in-out infinite;
+  --animate-breathe: breathe 9s ease-in-out infinite;
+  --animate-rays: rays 140s linear infinite;
 
   @keyframes float {
     0%,
@@ -163,6 +178,33 @@
     }
     50% {
       translate: 0 -10px;
+    }
+  }
+  @keyframes twinkle {
+    0%,
+    100% {
+      opacity: 1;
+      scale: 1;
+    }
+    50% {
+      opacity: 0.6;
+      scale: 0.8;
+    }
+  }
+  @keyframes breathe {
+    0%,
+    100% {
+      opacity: 0.85;
+      scale: 1;
+    }
+    50% {
+      opacity: 1;
+      scale: 1.05;
+    }
+  }
+  @keyframes rays {
+    to {
+      rotate: 1turn;
     }
   }
   @keyframes fade-up {
@@ -198,14 +240,6 @@
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
-}
-
-/* Ambient sunset + indigo glow behind hero sections. */
-@utility bg-aurora {
-  background-image:
-    radial-gradient(60% 55% at 78% 18%, var(--glow-2), transparent 70%),
-    radial-gradient(50% 50% at 62% 6%, var(--glow-1), transparent 70%),
-    radial-gradient(45% 55% at 8% 70%, var(--glow-3), transparent 70%);
 }
 
 /* Subtle dot grid (canvas backdrop, preview tiles). */
@@ -244,6 +278,113 @@
     inset 0 1px 0 rgb(255 255 255 / 0.25),
     inset 0 -1px 0 rgb(0 0 0 / 0.15),
     var(--shadow-glow);
+}
+
+/*
+ * ─── Light ─────────────────────────────────────────────────────────────────
+ * Lumora means light, so light is its signature: the spark from the logo
+ * glows, a dawn rises behind heroes, gradient words give off light and cards
+ * light up where the pointer is.
+ */
+
+/* Gradient words that give off light. */
+@utility text-glow {
+  background-image: linear-gradient(
+    100deg,
+    var(--brand-from) 0%,
+    var(--brand-via) 45%,
+    var(--brand-to) 70%,
+    var(--brand-violet) 100%
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 24px var(--text-glow));
+}
+
+/* The spark of light from the logo, glowing. */
+@utility glow-spark {
+  filter: drop-shadow(0 0 4px rgb(255 122 61 / 0.75)) drop-shadow(0 0 12px rgb(247 37 133 / 0.5));
+}
+
+/* A beam of light: a hairline that glows brightest in the middle (section dividers). */
+@utility light-line {
+  height: 1px;
+  background-image: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--brand-violet) 60%, transparent) 25%,
+    var(--brand-from) 50%,
+    color-mix(in oklab, var(--brand-to) 60%, transparent) 75%,
+    transparent
+  );
+  box-shadow: 0 0 16px 1px var(--text-glow);
+}
+
+/* Site surfaces: lit from above, a hairline edge and a deep, soft shadow. */
+@utility surface-lit {
+  background-color: var(--card);
+  background-image: linear-gradient(
+    180deg,
+    color-mix(in oklab, white 4%, transparent),
+    transparent 60%
+  );
+  border: 1px solid var(--border);
+  box-shadow:
+    inset 0 1px 0 var(--highlight),
+    var(--deep-shadow);
+}
+
+/*
+ * A surface that lights up where the pointer is: a glowing rim and a soft
+ * wash of light. LumenTracker sets --mx / --my on the element under the mouse.
+ */
+@utility lumen {
+  position: relative;
+  isolation: isolate;
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    padding: 1px;
+    border-radius: inherit;
+    background: radial-gradient(
+      280px circle at var(--mx, 50%) var(--my, 0%),
+      var(--lumen-rim),
+      transparent 70%
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) content-box exclude,
+      linear-gradient(#000 0 0);
+    opacity: 0;
+    transition: opacity 300ms;
+    pointer-events: none;
+  }
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: radial-gradient(
+      440px circle at var(--mx, 50%) var(--my, 0%),
+      var(--lumen-wash),
+      transparent 70%
+    );
+    opacity: 0;
+    transition: opacity 300ms;
+    pointer-events: none;
+  }
+  &:hover::before,
+  &:hover::after,
+  &:focus-visible::before {
+    opacity: 1;
+  }
 }
 
 /* Film-grain texture to make large flat areas feel less digital. */

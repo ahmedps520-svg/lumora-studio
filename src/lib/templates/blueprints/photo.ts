@@ -694,7 +694,8 @@ export function wideCards(k: Kit) {
   const top = m + 6 * u + th + 5 * u;
   const g = 3 * u;
   const cw = (w - 2 * g) / 3;
-  const labels = itemsOf(k, 3);
+  // Short labels only (a theme without items falls back to whole sentences).
+  const labels = itemsOf(k, 3).map((l) => (l.length <= 30 ? l : ""));
   const labelSize = 3.2 * u;
   const ch = H - top - m;
   for (let i = 0; i < 3; i++) {
@@ -706,6 +707,7 @@ export function wideCards(k: Kit) {
         size: k.fit(label, {
           w: cw - 6 * u - 2.4 * labelSize,
           max: labelSize,
+          min: 2 * u,
           lines: 1,
           font: "b",
         }),

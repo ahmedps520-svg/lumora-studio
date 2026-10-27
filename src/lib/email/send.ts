@@ -7,6 +7,7 @@ import "server-only";
  */
 import { Resend } from "resend";
 import { getServerEnv } from "@/lib/env";
+import type { EmailAttachment } from "./templates";
 
 export interface EmailMessage {
   to: string;
@@ -15,6 +16,8 @@ export interface EmailMessage {
   text: string;
   /** Short name for logs ("verify", "reset"…). Never the content. */
   kind: string;
+  /** Inline images (the logo), referenced from the HTML as cid:…. */
+  attachments?: EmailAttachment[];
 }
 
 /** Resend's shared test sender: works only for the address you signed up to Resend with. */
@@ -57,6 +60,11 @@ export async function sendEmail(message: EmailMessage): Promise<{ sent: boolean 
     subject: message.subject,
     html: message.html,
     text: message.text,
+    attachments: message.attachments?.map((a) => ({
+      filename: a.filename,
+      content: Buffer.from(a.content, "base64"),
+      contentId: a.contentId,
+    })),
   });
   if (error) {
     // The error name/code only — never the key or the email body.

@@ -141,6 +141,43 @@ export function ChangePasswordForm() {
   );
 }
 
+/** For when the current password is forgotten: a reset link to the account's own email. */
+export function EmailResetLink({ email }: { email: string }) {
+  const t = useTranslations("auth");
+  const [state, setState] = useState<"idle" | "busy" | "sent">("idle");
+  return (
+    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
+      <span>{t("forgotCurrent")}</span>
+      {state === "sent" ? (
+        <span className="text-success" role="status">
+          {t("resetLinkSent", { email })}
+        </span>
+      ) : (
+        <Button
+          variant="link"
+          size="sm"
+          className="h-auto p-0"
+          disabled={state === "busy"}
+          data-testid="email-reset-link"
+          onClick={async () => {
+            setState("busy");
+            const { error } = await authClient.requestPasswordReset({
+              email,
+              redirectTo: "/reset-password",
+            });
+            if (error) {
+              setState("idle");
+              toast.error(t(`errors.${errorKey(error)}`));
+            } else setState("sent");
+          }}
+        >
+          {t("emailResetLink")}
+        </Button>
+      )}
+    </div>
+  );
+}
+
 /** Sends a test email to the signed-in person (checks that Resend is set up). */
 export function TestEmailButton({ email }: { email: string }) {
   const t = useTranslations("auth");

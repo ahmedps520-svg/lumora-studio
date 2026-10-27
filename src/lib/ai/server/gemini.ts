@@ -140,6 +140,8 @@ export async function generateImage(opts: {
   aspectRatio: AspectRatio;
   size: ImageSize;
   quality: ImageQuality;
+  /** Pictures to edit (image-to-image); sent before the instructions. */
+  images?: { base64: string; mimeType: string }[];
 }): Promise<{ base64: string; mimeType: string; model: string }> {
   const model = imageModel(opts.quality);
   let response: Response;
@@ -149,7 +151,14 @@ export async function generateImage(opts: {
       headers: { "Content-Type": "application/json", "x-goog-api-key": opts.key.apiKey },
       body: JSON.stringify({
         model,
-        input: [{ type: "text", text: opts.prompt }],
+        input: [
+          ...(opts.images ?? []).map((i) => ({
+            type: "image",
+            data: i.base64,
+            mime_type: i.mimeType,
+          })),
+          { type: "text", text: opts.prompt },
+        ],
         response_format: {
           type: "image",
           mime_type: "image/jpeg",

@@ -116,11 +116,16 @@ function cover(k: Kit, style: Style) {
       ls: 250,
       upper: true,
     });
+    // The headline gets the room left above the subtitle and the footer line.
+    const subH = k.heightOf(c.subtitle, 3.8 * u, W * 0.55);
     const t = k.title(c.title, {
       x: 10 * u,
       y: 27 * u,
       w: W * 0.62,
-      max: 15 * u,
+      max: Math.min(
+        15 * u,
+        k.fitBox(c.title, { w: W * 0.62, maxH: H - 50 * u - subH, max: 15 * u, lines: 2 }),
+      ),
       lines: 2,
       color: on,
     });
@@ -157,11 +162,17 @@ function cover(k: Kit, style: Style) {
       ls: 200,
       upper: true,
     });
+    const subH = k.heightOf(c.subtitle, 3.4 * u, W - fw - 22 * u);
     const t = k.title(c.title, {
       x: 10 * u,
       y: 33 * u,
       w: W - fw - 20 * u,
-      max: 12 * u,
+      max: k.fitBox(c.title, {
+        w: W - fw - 20 * u,
+        maxH: H - 58 * u - subH,
+        max: 12 * u,
+        lines: 3,
+      }),
       lines: 3,
       color: p.ink,
     });

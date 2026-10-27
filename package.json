@@ -1,11 +1,11 @@
 {
   "name": "lumora-studio",
-  "version": "0.8.0",
+  "version": "0.13.0",
   "private": true,
   "description": "Lumora Studio â€” design anything. Let AI do the heavy lifting.",
   "license": "MIT",
   "engines": {
-    "node": ">=20.12"
+    "node": ">=22.13"
   },
   "scripts": {
     "dev": "next dev",

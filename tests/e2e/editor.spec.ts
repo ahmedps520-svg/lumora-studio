@@ -153,6 +153,23 @@ test("start a design from a template", async ({ page }) => {
   expect(errors).toEqual([]);
 });
 
+test("the full template library loads and its templates open", async ({ page }) => {
+  const errors: string[] = [];
+  page.on("pageerror", (err) => errors.push(err.message));
+
+  await page.goto("/templates");
+  // The built-in templates show at once; the rest of the library arrives a moment later.
+  await expect(page.getByTestId("template-library-loading")).toBeHidden({ timeout: 60_000 });
+  await expect(page.getByTestId("template-count")).toContainText(/\d{2},\d{3}/);
+  await page.getByTestId("template-search").fill("chess");
+  const chess = page.locator('[data-testid^="template-instagramPost-chess"]').first();
+  await chess.click();
+  await page.waitForURL(/\/editor\//);
+  await page.getByTestId("rail-layers").click();
+  expect(await page.getByTestId("layer-row").count()).toBeGreaterThan(3);
+  expect(errors).toEqual([]);
+});
+
 test("add a stock photo, then replace it from the Photos panel", async ({ page }) => {
   const errors: string[] = [];
   page.on("pageerror", (err) => errors.push(err.message));

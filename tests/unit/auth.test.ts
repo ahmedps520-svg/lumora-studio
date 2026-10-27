@@ -80,6 +80,49 @@ describe("accounts", () => {
     await auth.api.resetPassword({ body: { newPassword: "a brand new phrase", token } });
     expect((await signIn(email, "a brand new phrase")).status).toBe(200);
     expect((await signIn(email, password)).status).toBe(401);
+    // …and confirms the change by email, with a way back in if it wasn't them.
+    const notice = inbox.filter((m) => m.kind === "passwordChanged").at(-1)!;
+    expect(notice.to).toBe(email);
+    expect(notice.text).toContain(email);
+    expect(lastLink("passwordChanged")).toBe("http://localhost:3000/forgot-password");
+  });
+
+  it("emails a notice when the password is changed from the Account page", async () => {
+    const auth = await getAuth();
+    const login = await signIn(email, "a brand new phrase");
+    const cookie = login.headers
+      .getSetCookie()
+      .map((c) => c.split(";")[0])
+      .join("; ");
+    const before = inbox.filter((m) => m.kind === "passwordChanged").length;
+    const res = await auth.handler(
+      new Request("http://localhost:3000/api/auth/change-password", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          origin: "http://localhost:3000",
+          cookie,
+        },
+        body: JSON.stringify({
+          currentPassword: "a brand new phrase",
+          newPassword: "another fresh phrase",
+          revokeOtherSessions: true,
+        }),
+      }),
+    );
+    expect(res.status).toBe(200);
+    expect(inbox.filter((m) => m.kind === "passwordChanged").length).toBe(before + 1);
+
+    // A wrong current password changes nothing and sends nothing.
+    const wrong = await auth.handler(
+      new Request("http://localhost:3000/api/auth/change-password", {
+        method: "POST",
+        headers: { "content-type": "application/json", origin: "http://localhost:3000", cookie },
+        body: JSON.stringify({ currentPassword: "nope nope nope", newPassword: "whatever123" }),
+      }),
+    );
+    expect(wrong.status).toBeGreaterThanOrEqual(400);
+    expect(inbox.filter((m) => m.kind === "passwordChanged").length).toBe(before + 1);
   });
 
   it("doesn't reveal whether an address has an account", async () => {
@@ -99,6 +142,27 @@ describe("account emails", () => {
     expect(html).toContain("&lt;b&gt;Sam&lt;/b&gt;");
     expect(html).not.toContain("<b>Sam</b>");
     expect(text).toContain("Emails are working");
+  });
+
+  it("carry the logo inline and show the account details on security emails", () => {
+    const mail = renderEmail("passwordChanged", "ar", {
+      email: "dina@example.com",
+      url: "https://lumora.example/forgot-password",
+      when: new Date("2026-10-19T08:30:00Z"),
+    });
+    expect(mail.attachments[0]!.contentId).toBe("lumora-logo");
+    expect(mail.html).toContain("cid:lumora-logo");
+    expect(mail.html).toContain("dina@example.com");
+    expect(mail.html).toContain('dir="rtl"');
+    // Western digits, like the rest of the app.
+    expect(mail.text).toMatch(/19 .*2026/);
+    expect(mail.text).toContain("https://lumora.example/forgot-password");
+  });
+
+  it("list what's waiting in the welcome email", () => {
+    const { text, html } = renderEmail("welcome", "en", { name: "Sam", url: "https://x.example" });
+    expect(text).toContain("50,000+ templates");
+    expect(html).toContain("Start designing");
   });
 
   it("pick the language from the site cookie first", () => {

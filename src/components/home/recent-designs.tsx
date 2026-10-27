@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SectionHeading } from "@/components/site/section-heading";
 import type { DesignRecord } from "@/lib/storage/db";
 import { listDesigns, moveToTrash, restoreFromTrash } from "@/lib/storage/designs";
 
@@ -36,7 +37,7 @@ function DesignCard({ design }: { design: DesignRecord }) {
       <Link
         href={`/editor/${design.id}`}
         aria-label={t("openDesign", { name: design.name })}
-        className="block rounded-2xl surface-card p-2 transition-all duration-200 group-hover:-translate-y-1 group-hover:shadow-lifted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+        className="lumen block rounded-2xl surface-lit p-2 transition-transform duration-300 group-hover:-translate-y-1 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
       >
         <div className="relative flex aspect-[4/3] items-center justify-center overflow-hidden rounded-xl bg-surface-2 p-5">
           <div className="absolute inset-0 bg-dots opacity-70" />
@@ -102,14 +103,7 @@ export function RecentDesigns() {
 
   return (
     <section aria-labelledby="recent-heading">
-      <div className="mb-6">
-        <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
-          {t("recentEyebrow")}
-        </p>
-        <h2 id="recent-heading" className="mt-2 text-2xl font-semibold sm:text-3xl">
-          {t("recent")}
-        </h2>
-      </div>
+      <SectionHeading id="recent-heading" eyebrow={t("recentEyebrow")} title={t("recent")} />
       {failed ? (
         <p role="alert" className="text-sm text-destructive">
           {t("storageError")}
@@ -121,7 +115,7 @@ export function RecentDesigns() {
           ))}
         </div>
       ) : designs.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-3xl border border-dashed bg-card/50 px-6 py-14 text-center">
+        <div className="flex flex-col items-center gap-3 rounded-3xl border border-dashed bg-card/40 px-6 py-16 text-center">
           <span className="flex size-12 items-center justify-center rounded-2xl bg-surface-2">
             <LayoutTemplate className="size-6 text-muted-foreground" />
           </span>

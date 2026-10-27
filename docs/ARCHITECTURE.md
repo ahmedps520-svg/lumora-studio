@@ -83,7 +83,7 @@ the assistant returns validated tool calls that the browser applies as one undoa
 | `src/i18n`                 | Locale config, request config, `setLocale` server action                 |
 | `src/proxy.ts`             | Per-request nonce + CSP (Next.js 16 "proxy", formerly middleware)        |
 | `messages/`                | UI translations (`en.json`, `ar.json`) — keys must match                 |
-| `scripts/`                 | `check-env`, `generate-icons` (later: `seed-templates`)                  |
+| `scripts/`                 | `check-env`, `generate-icons`, `check-templates`, `gen-template-index`   |
 | `tests/unit`, `tests/e2e`  | Vitest and Playwright tests                                              |
 | `public/icons`, `brand`    | Generated PWA icons and logo files                                       |
 
@@ -145,6 +145,56 @@ Planned: `src/lib/export`, `src/templates`, more panels and dialogs.
 - Playwright (`tests/e2e`) starts `next dev` (or reuses one on port 3000) and checks the health API,
   the health page in a real browser (no console errors), the CSP header and Arabic RTL.
 
+## Photo editor (0.9.0)
+
+- Routes: `/photo` (open, new, recent — `PhotoHome`) and `/photo/[id]` (`PhotoLoader` →
+  `PhotoApp`, browser only). The home page's `WorkspaceChooser` links to both studios.
+- `src/lib/photo` is a raster engine independent of Fabric:
+  - `types.ts` — the document (`PhotoDoc`: size, layers bottom→top, guides) and layer kinds
+    (pixel, text, shape, fill, adjustment) with blend mode, opacity/fill, locks, mask, clip,
+    styles and position.
+  - `runtime.ts` — pixels live outside React in a registry (one canvas per layer at x/y, plus a
+    document-size mask). Draws text/shape/fill layers and composites the document (native canvas
+    blend modes, the other 11 per pixel in `blend.ts`, masks, clipping, adjustment layers,
+    styles).
+  - `pixels.ts`, `blur.ts`, `adjustments.ts`, `filters.ts`, `selection.ts`, `inpaint.ts` — pure
+    functions on `Img` (ImageData-shaped), unit-tested in `tests/unit/photo-engine.test.ts`.
+  - `store.ts` — Zustand state (document, tool, options, selection, view, panels, dialogs,
+    history). `transact(label, ids, fn)` records before/after snapshots of the touched layers;
+    strokes use `commit(label, before)`.
+  - `actions.ts` — every command (layers, masks, selections, edit, transform, image, filters,
+    guides, export); `tools.ts` — pointer handlers for each tool and the overlay state;
+    `session.ts` — open/close and ordered autosave; `storage.ts` — IndexedDB tables `photos`
+    and `photoData` (document JSON + a PNG per pixel layer and per mask).
+  - `tree.ts` — layer groups: the list stays flat (bottom → top) with `parentId`, each group's
+    contents directly below it; helpers move, group, ungroup and arrange whole blocks.
+    `composite` renders a pass-through group straight into its parent and any other group into
+    its own buffer first.
+  - `geometry.ts` + `transform.ts` — skew/distort/perspective (a projective map; exact
+    per-pixel on Apply, a triangle mesh while dragging) and warp (a 4 × 4 Bézier patch drawn as
+    a mesh).
+  - `paths.ts` — pen paths (anchors with Bézier handles): SVG path data, hit testing,
+    simplifying freehand strokes. `snap.ts` — snapping to guides and the canvas. `effects.ts`
+    — bevel shading.
+  - `generative.ts` — Generative fill: the area around the selection, with the selection painted
+    magenta, goes to `/api/ai/photo-fill` (Zod-validated in and out, rate limit, budget, BYOK
+    header); the answer becomes a new masked layer.
+- Painting stays fast by redrawing only what changed: brush tools stamp into a stroke buffer
+  per pointer event, and `flushPaint()` (called once per frame by the viewport) redraws just the
+  stamped area of the layer and records it with `markDirty`. The viewport then composites only
+  that area (`composite(..., { origin })` on a small canvas, padded by `redrawMargin` for layer
+  effects; whole-picture adjustments force a full redraw) and repaints only that part of the
+  screen. Autosave re-encodes only layers noted by `noteChanged` (in `transact`/`commit`/undo).
+- `src/components/photo/tour`: the tutorial — `steps.ts` lists every step (one per tool, plus
+  areas; a unit test checks every tool has one) and `tour.tsx` draws the spotlight and card.
+  `src/lib/photo/practice.ts` paints the practice photo.
+- `src/components/photo`: `viewport.tsx` (canvas, overlays, rulers, pointer/zoom/pan,
+  transform and crop handles), `menu-bar.tsx` + `commands.ts` (one command list for menus,
+  shortcuts and the shortcuts sheet), `options-bar.tsx`, `toolbar.tsx`, `panel-dock.tsx` and
+  `panels/*`, `dialogs.tsx`, `adjustment-editor.tsx`, `task-bar.tsx`.
+- The internal feature study (what's matched, what's missing) is
+  `docs/research/photo-editor-study.md`.
+
 ## Accounts and email (0.8.0)
 
 - `src/lib/auth/server.ts` configures Better Auth: email + password with required email
@@ -156,10 +206,14 @@ Planned: `src/lib/export`, `src/templates`, more panels and dialogs.
   (`?next=` is limited to paths on this site), `/forgot-password`, `/reset-password`,
   `/account`. The browser side uses `authClient` (`src/lib/auth/client.ts`); server pages use
   `currentUser()`.
+- A `hooks.after` middleware on `/change-password` and `onPasswordReset` send the
+  "password changed" notice (a failed notice never undoes the change).
 - `src/lib/email`: `renderEmail` builds the text + HTML of each email from the `email` messages
   (language from the site cookie, else Accept-Language); `sendEmail` sends through Resend, or
   prints in development when there's no key. `/api/email/test` emails only the signed-in user's
-  own confirmed address.
+  own confirmed address. The HTML is table-based with inline styles; the logo is an inline
+  attachment (`cid:lumora-logo`, from `logo.generated.ts`, made by
+  `scripts/gen-email-logo.mjs`). `/api/email/preview` renders them in development only.
 
 ## Photos (0.7.0)
 
@@ -185,6 +239,35 @@ Planned: `src/lib/export`, `src/templates`, more panels and dialogs.
 - Templates are rebuilt at any size of the same shape family (`templatesForSize`), so the editor
   panel can apply a post template to a custom-size post.
 - Icons come from `icons.generated.ts` (Lucide markup, produced by `scripts/gen-template-icons.mjs`).
+
+## Website look (0.13.0)
+
+- Lumora's signature is light. `globals.css` has the light utilities: `text-glow` (gradient words
+  that glow), `glow-spark`, `light-line` (a glowing hairline divider), `surface-lit` (site cards:
+  lit from above, deep soft shadow) and `lumen` (a rim and wash of light that follow the mouse;
+  `components/light/lumen-tracker.tsx`, mounted by the site header, sets `--mx`/`--my`). Theme
+  colours for the light are the `--lumen-*` tokens, set for light and dark mode.
+- `components/light`: `Spark` (the logo's spark), `LightDot`, `Dawn` (the hero light: glow, rays
+  and the canvas dot grid) and `PageLight` (a softer dawn for ordinary pages).
+  `components/site`: `Eyebrow`, `SectionHeading` and `SiteFooter`.
+
+## Template library (0.12.0)
+
+- Every (kind, theme, layout) comes in `VARIANTS` (4) palette-and-font variants, each with a
+  different palette; themes list the extra sizes they suit in `kinds` (every theme gets posts,
+  stories, portrait posts and Facebook posts). About 52,500 templates from 376 themes.
+- Generated themes live in `content/gen/*.ts` (and generated layouts, when there are any, in
+  `blueprints/gen/*.ts`); `scripts/gen-template-index.mjs` writes the two `index.ts` files.
+  How to write them: `docs/templates/authoring.md`.
+- They are **not** in the main bundle: `library.ts` → `loadTemplateLibrary()` imports them as a
+  separate chunk, adds them (`addThemes`, `addBlueprints`), resets the catalogue and notifies
+  subscribers. The gallery, the editor's Templates panel and the review page use
+  `useTemplateCatalog()`, which shows the hand-written templates at once and the full library
+  when it arrives; building a template (thumbnails, "use this template") awaits the load first.
+  Server renders and the home page only ever see the hand-written themes.
+- `scripts/check-templates.ts` checks a theme or layout file, a list of ids, or `--all` (every
+  template built in English and Arabic; text must stay on the page). The unit test checks a
+  spread sample. `/templates/review?theme=…&kind=…` (development only) shows templates for review.
 
 ## Pages, animation, downloads, photos and rich elements (0.5.0)
 

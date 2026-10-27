@@ -1,14 +1,14 @@
 "use client";
 
-import { ArrowRight, Search } from "lucide-react";
+import { ArrowRight, LoaderCircle, Search } from "lucide-react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
-import { useMemo, useState } from "react";
+import { useDeferredValue, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  catalog,
   featuredTemplates,
+  LIBRARY_SIZE,
   mixKinds,
   searchTemplates,
   TEMPLATE_KINDS,
@@ -16,10 +16,12 @@ import {
   type TemplateKind,
   type TemplateLocale,
 } from "@/lib/templates";
+import { SectionHeading } from "@/components/site/section-heading";
 import { cn } from "@/lib/utils";
 import { TemplateCard } from "./template-card";
 import { useBatches } from "./use-batches";
 import { useCreateFromTemplate } from "./use-create-from-template";
+import { useTemplateCatalog } from "./use-template-library";
 
 function Chip({
   active,
@@ -59,16 +61,18 @@ export function TemplateGallery() {
   const [query, setQuery] = useState("");
   const [kind, setKind] = useState<TemplateKind | null>(null);
   const [category, setCategory] = useState<string | null>(null);
-  const all = useMemo(() => catalog(), []);
+  const { all, ready } = useTemplateCatalog();
+  // Typing stays smooth while a library this size is searched.
+  const search = useDeferredValue(query);
   const shown = useMemo(() => {
     const found = searchTemplates(
       all.filter((d) => (!kind || d.kind === kind) && (!category || d.category === category)),
-      query,
+      search,
       locale,
     );
     // A varied mix while browsing; search results keep their order.
-    return query.trim() ? found : mixKinds(found, kind !== null);
-  }, [all, kind, category, query, locale]);
+    return search.trim() ? found : mixKinds(found, kind !== null);
+  }, [all, kind, category, search, locale]);
   const { visible, hasMore, more, sentinel } = useBatches(shown, 60);
 
   return (
@@ -122,8 +126,14 @@ export function TemplateGallery() {
           ))}
         </div>
       </div>
-      <p className="text-sm text-muted-foreground" data-testid="template-count">
-        {t("count", { count: shown.length })}
+      <p className="flex items-center gap-2 text-sm text-muted-foreground">
+        <span data-testid="template-count">{t("count", { count: shown.length })}</span>
+        {!ready && (
+          <span className="inline-flex items-center gap-1.5" data-testid="template-library-loading">
+            <LoaderCircle className="size-3.5 animate-spin" aria-hidden />
+            {t("loadingLibrary")}
+          </span>
+        )}
       </p>
       {shown.length === 0 ? (
         <p className="rounded-2xl border border-dashed p-10 text-center text-muted-foreground">
@@ -156,21 +166,19 @@ export function FeaturedTemplates() {
   const defs = useMemo(() => featuredTemplates(10), []);
   return (
     <section aria-labelledby="templates-heading">
-      <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h2 id="templates-heading" className="text-2xl font-semibold tracking-tight">
-            {t("homeTitle")}
-          </h2>
-          <p className="mt-1 text-muted-foreground">
-            {t("homeSubtitle", { count: catalog().length })}
-          </p>
-        </div>
-        <Button asChild variant="outline" data-testid="browse-templates">
-          <Link href="/templates">
-            {t("browseAll")} <ArrowRight className="rtl:-scale-x-100" />
-          </Link>
-        </Button>
-      </div>
+      <SectionHeading
+        id="templates-heading"
+        eyebrow={t("homeEyebrow")}
+        title={t("homeTitle")}
+        lead={t("homeSubtitle", { count: LIBRARY_SIZE.toLocaleString("en-US") })}
+        action={
+          <Button asChild variant="glass" className="rounded-full" data-testid="browse-templates">
+            <Link href="/templates">
+              {t("browseAll")} <ArrowRight className="rtl:-scale-x-100" />
+            </Link>
+          </Button>
+        }
+      />
       <div className="columns-2 gap-4 sm:columns-3 lg:columns-5 [&>*]:mb-5">
         {defs.map((def) => (
           <TemplateCard key={def.id} def={def} onPick={create} disabled={creating !== null} />

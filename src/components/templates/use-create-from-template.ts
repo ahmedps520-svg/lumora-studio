@@ -20,7 +20,8 @@ export function useCreateFromTemplate() {
       if (creating) return;
       setCreating(def.id);
       try {
-        const { buildTemplate } = await import("@/lib/templates");
+        const { buildTemplate, loadTemplateLibrary } = await import("@/lib/templates");
+        await loadTemplateLibrary();
         const built = buildTemplate(def, locale);
         const design = createDesign({ name: built.name, format: built.format, pages: built.pages });
         await saveDesign(design);

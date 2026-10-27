@@ -11,6 +11,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { betterAuth, type BetterAuthOptions } from "better-auth";
+import { createAuthMiddleware, isAPIError } from "better-auth/api";
 import { getMigrations } from "better-auth/db/migration";
 import { nextCookies } from "better-auth/next-js";
 import { sendEmail } from "@/lib/email/send";
@@ -55,11 +56,26 @@ async function mail(
   url: string | undefined,
   request?: Request,
 ) {
-  const { subject, html, text } = renderEmail(kind, emailLocale(request), {
+  const site = siteUrl(request);
+  const { subject, html, text, attachments } = renderEmail(kind, emailLocale(request), {
     name: user.name ?? "",
     url,
+    siteUrl: site,
+    email: user.email,
+    when: new Date(),
   });
-  await sendEmail({ to: user.email, subject, html, text, kind });
+  await sendEmail({ to: user.email, subject, html, text, kind, attachments });
+}
+
+/** "Your password was changed" — with a link to reset it, in case it wasn't them. */
+async function passwordChanged(user: { email: string; name?: string | null }, request?: Request) {
+  const site = siteUrl(request);
+  try {
+    await mail("passwordChanged", user, site ? `${site}/forgot-password` : undefined, request);
+  } catch (error) {
+    // The password is already changed; a failed notice must not undo that.
+    console.error("[auth] Couldn't send the password-changed email:", (error as Error).name);
+  }
 }
 
 export function authOptions(database: DatabaseSync): BetterAuthOptions {
@@ -76,6 +92,7 @@ export function authOptions(database: DatabaseSync): BetterAuthOptions {
       maxPasswordLength: 128,
       revokeSessionsOnPasswordReset: true,
       sendResetPassword: ({ user, url }, request) => mail("reset", user, url, request),
+      onPasswordReset: ({ user }, request) => passwordChanged(user, request),
     },
     emailVerification: {
       sendOnSignUp: true,
@@ -84,6 +101,14 @@ export function authOptions(database: DatabaseSync): BetterAuthOptions {
       autoSignInAfterVerification: true,
       sendVerificationEmail: ({ user, url }, request) => mail("verify", user, url, request),
       afterEmailVerification: (user, request) => mail("welcome", user, siteUrl(request), request),
+    },
+    hooks: {
+      // A changed password (from the Account page) is confirmed by email.
+      after: createAuthMiddleware(async (ctx) => {
+        if (ctx.path !== "/change-password" || isAPIError(ctx.context.returned)) return;
+        const user = ctx.context.session?.user;
+        if (user) await passwordChanged(user, ctx.request);
+      }),
     },
     // Must be last: lets server actions set the session cookie.
     plugins: [nextCookies()],

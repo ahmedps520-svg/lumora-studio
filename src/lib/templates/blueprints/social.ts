@@ -895,10 +895,17 @@ export function circleBadge(k: Kit) {
   const stats = k.c.stats.slice(0, 3);
   const ctaH = c.cta ? pillH(3.1 * u) + 6 * u : 0;
   const statsH = stats.length ? 14 * u : k.heightOf(c.subtitle, 3.6 * u, w);
-  const titleSize = k.fit(c.title, { w, max: k.tall ? 13 * u : 10 * u, lines: 2 });
+  // The badge keeps at least this radius; the headline gets the room that's left.
+  const minR = 9 * u;
+  const titleSize = k.fitBox(c.title, {
+    w,
+    maxH: H - 2 * m - 12 * u - statsH - ctaH - 2 * minR - 14 * u,
+    max: k.tall ? 13 * u : 10 * u,
+    lines: 2,
+  });
   const th = k.heightOf(c.title, titleSize, w, "h");
   const textH = 6 * u + th + 6 * u + statsH + ctaH;
-  const r = Math.min(W * (k.tall ? 0.26 : 0.17), (H - 2 * m - textH - 14 * u) / 2);
+  const r = Math.max(minR, Math.min(W * (k.tall ? 0.26 : 0.17), (H - 2 * m - textH - 14 * u) / 2));
   const cy = m + 4 * u + r + Math.max(0, (H - 2 * m - textH - 2 * r - 14 * u) / 2);
   k.circle(W / 2, cy, r + 4 * u, {
     fill: null,

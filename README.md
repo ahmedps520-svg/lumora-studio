@@ -12,6 +12,40 @@ the app keeps low and shows you.
 
 ## What works now
 
+- **Two studios:** the home page first asks what you want to make — a **Design** (the editor
+  below) or a photo in the **Photo editor** (Lumora Photo).
+- **Photo editor (Lumora Photo, at `/photo`):** a full pro photo editor in the browser. Open a
+  photo (or drop one, or start a blank canvas from presets) and edit with:
+  - **39 tools** in toolbar groups with the classic one-letter shortcuts: move, rectangular and
+    elliptical marquee, lasso, polygonal lasso, magic wand, crop (ratios, keep/delete pixels),
+    eyedropper, ruler (with straighten), spot healing, healing brush, red eye, brush, pencil,
+    colour replacement, clone stamp, history brush, eraser, magic eraser, gradient (5 styles),
+    paint bucket, blur, sharpen, smudge, liquify brush, dodge, burn, sponge, type, rectangle,
+    ellipse, triangle, polygon, line, pen, freeform pen, path selection, hand and zoom — plus foreground/background colours and
+    **Quick Mask**.
+  - **Layers:** pixel, text, shape, fill and **adjustment layers**, and **groups** (nested,
+    pass-through or isolated; Ctrl+G / Ctrl+Shift+G; Ctrl/Shift-click to pick several); all
+    **27 blend modes**; opacity and fill; locks; **layer masks**; clipping masks; layer styles
+    (drop shadow, inner shadow, outer and inner glow, **bevel & emboss**, stroke, colour and
+    gradient overlay); merge, flatten, align; drag to reorder or into a group.
+  - **Transform:** free transform plus **skew, distort, perspective and warp** (a 4 × 4 grid);
+    moving, transforming and cropping **snap** to guides and the canvas edges and centre.
+  - **Tutorial:** a step-by-step tour of every tool and panel with a practice photo (Photo home →
+    **Start the tutorial**, the status bar, or Help → Tutorial).
+  - **Pen tools and paths:** pen (corners and curves), freeform pen, path selection, a
+    **Paths** panel, load a path as a selection (Ctrl+Enter), make a path from a selection,
+    fill or stroke a path.
+  - **Selections:** add/subtract/intersect, feather, select subject (on-device AI), colour range,
+    grow/similar, modify (expand, contract, border, smooth), inverse, save/load.
+  - **20 adjustments** (Levels, Curves, Hue/Saturation, Colour Balance, Black & White, Channel
+    Mixer, Selective Colour, Gradient Map, Develop…) as layers or applied to pixels, and **50+
+    filters** (blurs incl. tilt-shift and iris, distort, noise, pixelate, render, sharpen,
+    stylize, lens correction, skin smoothing) with live preview.
+  - **Generative fill** (describe what should appear in a selection — needs a Google AI key),
+    content-aware fill, remove background, free transform, image/canvas size, rotate/flip, a
+    History panel (40 steps), rulers, guides, grid, every menu (File, Edit, Image, Layer, Type,
+    Select, Filter, View, Window, Help) and keyboard shortcuts. Photos autosave in your browser;
+    export PNG, JPG or WebP.
 - **Editor:** shapes, lines, text and **images**; move/resize/rotate on the canvas; zoom and pan;
   **groups** (Ctrl+G / Ctrl+Shift+G — move, resize and rotate as one piece); layers (rename,
   hide, lock, drag to reorder, expand groups); properties panel; undo/redo (200 steps);
@@ -25,11 +59,13 @@ the app keeps low and shows you.
   minute); after that it takes a few seconds. Ctrl+Z brings the original back.
 - **Title effects:** thick outlines, solid **3D sides**, drop shadows and gradient letters — the
   "game title" look — plus 20+ display fonts (Luckiest Guy, Lilita One, Bungee, Cinzel…).
-- **Templates (2,400+):** Instagram posts, stories and portrait posts, Pinterest pins, Facebook
+- **Templates (50,000+):** Instagram posts, stories and portrait posts, Pinterest pins, Facebook
   and X posts and covers, LinkedIn posts and banners, YouTube thumbnails, 8-slide presentations,
   posters, flyers, invitations, two-sided business cards, logos, certificates, menus and résumés —
-  106 themes (sales, Black Friday, skincare, birthdays, weddings, Ramadan & Eid, pizza, sushi,
-  fitness, travel, dentists, law firms, podcasts, gaming…), each in **English and Arabic** (Arabic
+  376 themes (sales, Black Friday, skincare, birthdays, weddings, Ramadan & Eid, pizza, sushi,
+  fitness, travel, dentists, law firms, podcasts, gaming, tutoring, chess clubs, SaaS pricing,
+  tea tastings, town halls…), each layout in four colour-and-font variants, each in **English
+  and Arabic** (Arabic
   versions are laid out right-to-left with Arabic fonts). Templates come **with real photos**
   that suit the theme, already placed. Browse them at **Templates** (search, size and topic
   filters) or in the editor's **Templates** panel, which shows the ones that fit your design and
@@ -184,6 +220,12 @@ them:
    `EMAIL_FROM="Lumora Studio <hello@yourdomain.com>"`.
 4. Log in, open **Account** and press **Send me a test email**.
 
+Lumora sends: a confirm-your-email link when you sign up, a welcome email once it's confirmed, a
+reset link when you forget your password (or press **Email me a reset link** on the Account page),
+and a "your password was changed" notice after any password change. While `npm run dev` is running,
+<http://localhost:3000/api/email/preview> shows every email in both languages without sending
+anything.
+
 When you put the site online, also set `BETTER_AUTH_SECRET` (32+ random characters — the
 `.env.example` file shows a command that makes one) and `BETTER_AUTH_URL` (the site's address,
 used in email links).
@@ -255,7 +297,7 @@ Templates are generated in code, so they cost nothing and stay editable (`src/li
 | 6     | AI advanced: resize, translate, brand AI, slides, vision, illustrations, and more | Next    |
 | 2     | Rich editing: text styling, images, snapping, groups, frames, icons, shortcuts    | ✅ Mostly done (0.4–0.5) |
 | 3     | Pages, dashboard, export (PNG/JPG/SVG/PDF/PPTX), version history, present mode    | 🟡 Pages, present, PNG/JPG/SVG/PDF/MP4 done; PPTX and version history to do |
-| 4     | Fonts, stock photos, brand kit, charts, tables, QR, templates browser             | 🟡 Charts, tables, QR, photos, 2,400+ templates done |
+| 4     | Fonts, stock photos, brand kit, charts, tables, QR, templates browser             | 🟡 Charts, tables, QR, photos, 50,000+ templates done |
 | 7     | Polish: dark mode / RTL pass, touch, offline, onboarding, performance             |         |
 | 8     | Ship: templates, guide, free deployment                                           |         |
 
@@ -287,6 +329,7 @@ The build brief asked for sensible defaults instead of questions. Here is what w
 | Templates      | Generated from layouts × themes × palettes × fonts (not saved files) | Thousands of consistent, editable designs in two languages for free, each rebuilt at the exact size of the design it goes into. |
 | Stock photos   | A hand-picked list of free Unsplash photos, loaded from Unsplash's image servers | Real photos in every template with no account, key or cost; photos are credited, and branded or off-topic shots were left out. |
 | Snapping       | Engine-level smart guides (6 screen px, Alt to disable)       | Works the same at every zoom level and never fights keyboard nudges.                                                                              |
+| Photo editor   | Its own Canvas 2D engine (`src/lib/photo`), separate from the design editor | A raster editor needs per-pixel layers, masks and blend modes that Fabric doesn't model; plain canvases keep it fast, testable and dependency-free. |
 
 ## Known issues
 
@@ -309,6 +352,10 @@ The build brief asked for sensible defaults instead of questions. Here is what w
   needs a free Unsplash API key — not wired up yet. Photos load from Unsplash, so templates show
   their photos only when you're online (they're cached once seen). Template text uses made-up
   names, numbers and addresses; replace them.
+- The photo editor works on the main thread, so filters on very large photos (up to 8192 px a
+  side) take a few seconds. It doesn't open or save layered files from other apps, and has no
+  smart objects, vector masks or channels yet (see `docs/research/photo-editor-study.md`).
+  Generative fill is tested against a fake Google server only (no Google key here).
 - Tables can't merge cells from the editor yet (the data model supports it), and on-canvas cell
   editing isn't there yet — edit cells in the side panel.
 - This folder is inside **OneDrive**. OneDrive tries to sync `node_modules` (thousands of files),

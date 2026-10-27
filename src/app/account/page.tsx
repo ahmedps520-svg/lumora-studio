@@ -2,12 +2,18 @@ import { BadgeCheck, CircleAlert } from "lucide-react";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { ChangePasswordForm, SignOutButton, TestEmailButton } from "@/components/auth/account";
+import {
+  ChangePasswordForm,
+  EmailResetLink,
+  SignOutButton,
+  TestEmailButton,
+} from "@/components/auth/account";
 import { Notice } from "@/components/auth/fields";
 import { Card } from "@/components/settings/ai-settings";
 import { SiteHeader } from "@/components/site-header";
 import { currentUser } from "@/lib/auth/session";
 import { getFeatureFlags } from "@/lib/env";
+import { PageLight } from "@/components/light/dawn";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("auth");
@@ -27,10 +33,7 @@ export default async function AccountPage({
 
   return (
     <div className="relative isolate min-h-dvh">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[420px] bg-aurora [mask-image:linear-gradient(to_bottom,black_40%,transparent)] opacity-70"
-      />
+      <PageLight />
       <SiteHeader />
       <main id="main" className="mx-auto max-w-2xl space-y-4 px-4 pt-8 pb-20 sm:px-6">
         <h1 className="text-3xl font-semibold">{t("accountTitle")}</h1>
@@ -58,7 +61,9 @@ export default async function AccountPage({
           </div>
         </Card>
         <Card title={t("changePassword")}>
+          <p className="-mt-2 text-xs text-muted-foreground">{t("changeNotice")}</p>
           <ChangePasswordForm />
+          <EmailResetLink email={user.email} />
         </Card>
         <Card title={t("emails")}>
           <p className="text-sm text-muted-foreground">{emailOn ? t("emailOn") : t("emailOff")}</p>

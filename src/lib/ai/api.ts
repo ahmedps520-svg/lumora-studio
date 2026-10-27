@@ -27,6 +27,7 @@ import type {
   ReviewRequestSchema,
 } from "./premium";
 import { useAiLedger } from "./ledger";
+import type { PhotoFillRequestSchema } from "./photo-fill";
 import type { AiTask } from "./models";
 import { currentPrefs, useAiSettings } from "./settings-store";
 
@@ -175,6 +176,43 @@ export async function aiArtwork(
   let response: Response;
   try {
     response = await fetch("/api/ai/image", {
+      method: "POST",
+      headers,
+      body: JSON.stringify(body),
+      signal,
+    });
+  } catch (error) {
+    if ((error as Error).name === "AbortError") throw error;
+    throw new AiClientError("network", "network");
+  }
+  const data = (await response.json().catch(() => null)) as
+    | { image: string; model: string; costUsd: number; error?: undefined }
+    | { error: { code: AiErrorCode; message: string } }
+    | null;
+  if (!response.ok || !data || ("error" in data && data.error)) {
+    const err = data && "error" in data && data.error ? data.error : null;
+    throw new AiClientError(err?.code ?? "server_error", err?.message ?? "server_error");
+  }
+  const result = data as { image: string; model: string; costUsd: number };
+  useAiLedger.getState().record("artwork", { model: result.model, costUsd: result.costUsd });
+  return result;
+}
+
+/** Photo editor Generative Fill (Gemini). Uses the user's own Google key when set. */
+export async function aiPhotoFill(
+  body: z.input<typeof PhotoFillRequestSchema>,
+  signal?: AbortSignal,
+): Promise<{ image: string; model: string; costUsd: number }> {
+  const settings = useAiSettings.getState();
+  useAiLedger.getState().refresh();
+  if (useAiLedger.getState().spentUsd >= settings.dailyBudgetUsd) {
+    throw new AiClientError("client_budget", "client_budget");
+  }
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (settings.googleKey.trim()) headers[GOOGLE_BYOK_HEADER] = settings.googleKey.trim();
+  let response: Response;
+  try {
+    response = await fetch("/api/ai/photo-fill", {
       method: "POST",
       headers,
       body: JSON.stringify(body),

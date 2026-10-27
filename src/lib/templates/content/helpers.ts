@@ -29,5 +29,6 @@ export const theme = (
   palettes: t.palettes,
   fonts: t.fonts,
   photos: t.photos,
+  kinds: t.kinds,
   copy: { en: copy(t.en), ar: copy(t.ar) },
 });

@@ -5,6 +5,146 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+## [0.13.0] — 2026-10-24 — A brighter website
+
+### Changed
+
+- **A new look for the website**, built around light — Lumora's own signature. The spark from
+  the logo glows on section labels and headlines, a soft dawn rises behind the home page over the
+  design canvas's dot grid, gradient words give off light, and cards **light up where your mouse
+  is**. Bigger, tighter headlines, pill buttons, lit cards with deep soft shadows, and more room
+  between sections. Works in light and dark mode, English and Arabic, on phones and desktops.
+- **Home page:** the choice of studio (Design or Photo editor) is now the hero's main action, under
+  the headline; Magic Design has its own section beside the product preview; a closing invitation
+  and a proper footer (links to templates, the photo editor, settings, your account and system
+  health) end the page.
+- Templates, Photo, log-in, sign-up, settings and account pages share the same light and headings.
+- The header is a floating glass capsule; on phones it fits (the wordmark shortens to "Lumora").
+
+### Fixed
+
+- Magic Design's style chips no longer squeeze into a narrow column; they get a row of their own.
+
+## [0.12.0] — 2026-10-23 — A template library twenty times bigger
+
+### Added
+
+- **52,500 templates** (up from 2,484): **270 new themes** in English and Arabic — tutoring
+  centres, chess tournaments, debate clubs, book fairs, creator media kits, cosplay reveals,
+  SaaS pricing, insurance agencies, tea tastings, bridal trunk shows, town halls and many
+  more — across education, creators, sports, marketing, business and tech. Each theme comes in
+  the sizes that suit it (a café gets menus, logos and business cards; a webinar gets LinkedIn
+  posts, banners and slides), and every layout comes in **four colour-and-font variants**.
+- Every new theme was copy-edited in both languages: natural Arabic grammar and idiom, dates
+  that match their weekdays, English and Arabic that say the same thing, no real brand names.
+- Six new topics in the gallery: Beauty & fashion, Home & family, Sports, Travel, Health, and
+  Arts & culture.
+
+### Changed
+
+- The template library **loads on demand**: the gallery and the editor's Templates panel show the
+  hand-written templates at once and the full library a moment later ("Loading the full
+  library…"), so the home page and the editor don't download it.
+- Searching and browsing stay fast with a library this size (cached search words and names,
+  deferred typing).
+
+### Fixed
+
+- Layouts that broke on longer words: the round-badge layout no longer crashes on two-line
+  headlines, slide covers fit long subtitles, banner handles and side notes stay on one line,
+  and card labels never overflow.
+
+## [0.11.0] — 2026-10-20 — Photo editor tutorial and smooth painting
+
+### Added
+
+- **Photo editor tutorial:** a guided tour of every area and **every tool** (62 steps in 14
+  chapters). Each step points at the tool or panel, picks the tool for you and says how to try
+  it, with a "you tried it" tick once you do. Jump between chapters, go back, or stop and carry
+  on later where you left off. Start it from **Start the tutorial** on the Photo home (opens a
+  practice photo made for it), the **Tutorial** button in the status bar, Help → Tutorial (F1),
+  or the prompt shown the first time you open the editor. English and Arabic.
+
+### Fixed
+
+- **Painting no longer freezes the editor.** Every brush movement used to redraw the whole
+  layer and the whole picture (about a second per movement on a 4K photo); now each frame
+  redraws only the part the brush touched, at most once per frame, and layer thumbnails wait
+  until you pause. In our test, four brush strokes on a 4K photo went from 336 freezes
+  (5 minutes in total) to 4 short pauses.
+- **Autosave no longer pauses painting:** it waits until a stroke ends, re-encodes only the
+  layers that changed, and refreshes the gallery thumbnail at most every 15 seconds (and when
+  you leave).
+
+## [0.10.0] — 2026-10-20 — Photo editor: groups, paths and warp
+
+### Added
+
+- **Layer groups** in the photo editor: New group, Group layers (Ctrl+G) and Ungroup
+  (Ctrl+Shift+G), nested groups, open/close in the Layers panel, drag layers into and out of
+  groups, Ctrl/Shift-click to pick several layers, group opacity, blend mode ("Pass through"
+  or isolated), masks and effects, Merge group. Moving a group moves everything inside it.
+- **Skew, distort, perspective and warp** (Edit → Transform, or the mode switch while
+  transforming): corner and side handles for the first three, a 4 × 4 grid for warp. Skew,
+  distort and perspective are rendered exactly when applied.
+- **New layer effects:** inner shadow, inner glow, bevel & emboss (depth, size, angle,
+  altitude, highlight and shadow) and gradient overlay, in a redesigned Layer Style dialog.
+- **Pen tools and paths:** pen (click for corners, drag for curves, click the first point to
+  close), freeform pen, path selection (move anchors, handles or the whole path; Alt-click turns
+  a point into a corner; Delete removes it), a **Paths** panel (rename, delete, fill, stroke),
+  Load path as selection (Ctrl+Enter) and Make work path from a selection.
+- **Snapping:** moving layers, selections, transforms and the crop box snap to guides and the
+  canvas edges and centre (View → Snap, Ctrl+Shift+;), with pink guide lines; Shift keeps a
+  move straight.
+
+### Changed
+
+- Photos saved by 0.9.0 open with the new effects switched off and an empty Paths panel.
+
+## [0.9.0] — 2026-10-19 — Photo editor
+
+### Added
+
+- **Lumora Photo**, a pro photo editor at `/photo`. The home page now starts with a choice:
+  **Design** or **Photo editor**; the header has a **Photo** link.
+- Photo home: open a photo (file picker or drag and drop), start a blank canvas from presets
+  (HD, 4K, square, portrait, story, A4, Letter, banner or custom size and background), and
+  reopen recent photos (move to trash with undo).
+- Editor workspace: menu bar (File, Edit, Image, Layer, Type, Select, Filter, View, Window,
+  Help), tool options bar, toolbar with tool groups and flyouts, rulers, guides, grid, pixel
+  grid, tabbed panel groups (Color, Swatches, Navigator, Histogram, Info · Properties,
+  Adjustments, Character · Layers, History), status bar and a floating task bar.
+- 36 tools: selection (marquees, lassos, magic wand, quick mask), crop, eyedropper, ruler,
+  healing (spot, brush, red eye), painting (brush, pencil, colour replacement, clone stamp,
+  history brush, erasers, gradient, paint bucket), local edits (blur, sharpen, smudge, liquify,
+  dodge, burn, sponge), type, five shapes, hand and zoom.
+- Layers with 27 blend modes, opacity/fill, locks, masks, clipping masks, layer styles, fill and
+  adjustment layers; 20 adjustments; 50+ filters with live preview; free transform; image and
+  canvas size; rotate/flip; crop/trim/reveal all; align to canvas; content-aware fill; select
+  subject and remove background (on-device); **Generative fill** through `/api/ai/photo-fill`
+  (Gemini, your own or the site's Google key; the result goes on a new masked layer).
+- Undo/redo with a History panel, keyboard shortcuts (and a shortcuts sheet), clipboard paste of
+  images, autosave to the browser, export to PNG/JPG/WebP.
+- English and Arabic for everything in the photo editor.
+
+## [0.8.1] — 2026-10-19 — Better account emails
+
+### Added
+
+- **"Your password was changed" email** after a password reset or a change on the Account page,
+  with the account, the time and a button to reset the password if it wasn't you.
+- **Email me a reset link** on the Account page, for when you don't remember your current
+  password.
+- Development-only email previews at `/api/email/preview` (every email, in both languages, with
+  sample data — nothing is sent).
+
+### Changed
+
+- **Redesigned account emails** (confirm, welcome, reset, test): the Lumora logo travels inside
+  the email, a brand gradient bar, a clear headline, one solid button, a link box for when the
+  button doesn't work, and a proper footer; the welcome email lists what you can do. Laid out
+  right-to-left in Arabic, with Western digits.
+
 ## [0.8.0] — 2026-10-19 — Accounts and emails
 
 ### Added

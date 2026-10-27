@@ -115,7 +115,7 @@ export function MagicDesignBox() {
   };
 
   return (
-    <div className="rounded-3xl surface-glass p-2.5" data-testid="magic-design-box">
+    <div className="lumen rounded-3xl surface-lit p-2.5" data-testid="magic-design-box">
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -143,6 +143,9 @@ export function MagicDesignBox() {
             data-testid="magic-home-prompt"
           />
         </div>
+        <div className="hidden px-1.5 pt-3 sm:block">
+          <StylePicker value={activeStyle} onChange={setStyle} />
+        </div>
         <div className="flex flex-wrap items-center gap-2 px-1.5 pt-2.5 pb-1">
           <Select value={presetId} onValueChange={setPresetId}>
             <SelectTrigger
@@ -160,9 +163,6 @@ export function MagicDesignBox() {
               ))}
             </SelectContent>
           </Select>
-          <div className="hidden min-w-0 flex-1 overflow-x-auto sm:block">
-            <StylePicker value={activeStyle} onChange={setStyle} />
-          </div>
           <label
             className="flex items-center gap-2 rounded-full border bg-card/70 px-3 py-1 text-xs font-medium"
             title={tp("toggleHint")}

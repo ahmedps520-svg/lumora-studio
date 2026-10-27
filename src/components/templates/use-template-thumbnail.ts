@@ -46,11 +46,13 @@ export function useTemplateThumbnail(def: TemplateDef, locale: TemplateLocale, m
     let cancelled = false;
     void enqueue(async () => {
       if (cancelled) return;
-      const [{ buildTemplate }, { renderPageToDataUrl }, { scalePhotos }] = await Promise.all([
-        import("@/lib/templates"),
-        import("@/lib/engine/render"),
-        import("@/lib/photos"),
-      ]);
+      const [{ buildTemplate, loadTemplateLibrary }, { renderPageToDataUrl }, { scalePhotos }] =
+        await Promise.all([
+          import("@/lib/templates"),
+          import("@/lib/engine/render"),
+          import("@/lib/photos"),
+        ]);
+      await loadTemplateLibrary();
       const built = buildTemplate(def, locale);
       const page = built.pages[0]!;
       // Small photos for a small picture (×2 keeps them sharp on high-DPI screens).

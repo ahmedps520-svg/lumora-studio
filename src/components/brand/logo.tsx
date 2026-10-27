@@ -44,14 +44,27 @@ export function LogoMark({
   );
 }
 
-/** Mark + "Lumora Studio" wordmark. */
-export function Logo({ className, compact = false }: { className?: string; compact?: boolean }) {
+/** Mark + "Lumora Studio" wordmark ("Studio" only from small screens up with `collapse`). */
+export function Logo({
+  className,
+  compact = false,
+  collapse = false,
+}: {
+  className?: string;
+  compact?: boolean;
+  collapse?: boolean;
+}) {
   return (
     <span className={cn("inline-flex items-center gap-2", className)}>
       <LogoMark className="size-8" decorative />
       <span className="font-heading text-lg leading-none font-semibold tracking-tight" dir="ltr">
         Lumora
-        {!compact && <span className="font-normal text-muted-foreground"> Studio</span>}
+        {!compact && (
+          <span className={cn("font-normal text-muted-foreground", collapse && "hidden sm:inline")}>
+            {" "}
+            Studio
+          </span>
+        )}
       </span>
     </span>
   );

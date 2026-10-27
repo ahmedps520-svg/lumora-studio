@@ -1,10 +1,12 @@
 /**
- * Lumora's built-in templates: hundreds of designs generated from layouts ×
- * themes × palettes × fonts, in English and Arabic. Every template becomes
- * ordinary, fully editable elements.
+ * Lumora's built-in templates: tens of thousands of designs generated from
+ * layouts × themes × palettes × fonts, in English and Arabic. Every template
+ * becomes ordinary, fully editable elements. Most of the library loads on
+ * demand (see ./library.ts).
  */
 import { buildTemplate, kindFormat, templateName, type BuiltTemplate } from "./build";
 import { catalog, getTemplateDef } from "./catalog";
+import { LIBRARY_SIZE, libraryLoaded, loadTemplateLibrary, subscribeLibrary } from "./library";
 import { getTheme } from "./content";
 import { FONT_PAIRS, type FontPair } from "./fonts";
 import { PALETTES, swatches, type Palette } from "./palettes";
@@ -21,6 +23,10 @@ export {
   catalog,
   getTemplateDef,
   kindFormat,
+  LIBRARY_SIZE,
+  libraryLoaded,
+  loadTemplateLibrary,
+  subscribeLibrary,
   templateName,
   TEMPLATE_KINDS,
   THEME_CATEGORIES,
@@ -39,9 +45,15 @@ export function shapeFamily(width: number, height: number): ShapeFamily {
   return "wide";
 }
 
+const families = new Map<TemplateKind, ShapeFamily>();
 export function kindFamily(kind: TemplateKind): ShapeFamily {
-  const f = kindFormat(kind);
-  return shapeFamily(f.width, f.height);
+  let family = families.get(kind);
+  if (!family) {
+    const f = kindFormat(kind);
+    family = shapeFamily(f.width, f.height);
+    families.set(kind, family);
+  }
+  return family;
 }
 
 /** Templates that fit a design of this size (best matches — same kind — first). */
@@ -49,9 +61,10 @@ export function templatesForSize(
   width: number,
   height: number,
   presetId?: string | null,
+  defs: TemplateDef[] = catalog(),
 ): TemplateDef[] {
   const family = shapeFamily(width, height);
-  const all = catalog().filter((d) => kindFamily(d.kind) === family);
+  const all = defs.filter((d) => kindFamily(d.kind) === family);
   return [...all.filter((d) => d.kind === presetId), ...all.filter((d) => d.kind !== presetId)];
 }
 
@@ -67,7 +80,8 @@ function idHash(id: string): number {
  * `byKind`) the kinds taken in turn.
  */
 export function mixKinds(defs: TemplateDef[], byKind = false): TemplateDef[] {
-  const mixed = [...defs].sort((a, b) => idHash(a.id) - idHash(b.id));
+  const hashes = new Map(defs.map((d) => [d, idHash(d.id)]));
+  const mixed = [...defs].sort((a, b) => hashes.get(a)! - hashes.get(b)!);
   if (byKind) return mixed;
   const groups = new Map<string, TemplateDef[]>();
   for (const d of mixed) {
@@ -82,6 +96,27 @@ export function mixKinds(defs: TemplateDef[], byKind = false): TemplateDef[] {
   return out;
 }
 
+/** The searchable words of a theme (computed once; the catalogue is large). */
+const haystacks = new Map<string, string>();
+function haystack(themeId: string): string {
+  let hay = haystacks.get(themeId);
+  if (hay === undefined) {
+    const theme = getTheme(themeId);
+    hay = [
+      theme.id,
+      theme.category,
+      ...(["en", "ar"] as const).flatMap((l) => {
+        const c = theme.copy[l];
+        return [c.title, c.kicker, c.subtitle, c.name];
+      }),
+    ]
+      .join(" ")
+      .toLowerCase();
+    haystacks.set(themeId, hay);
+  }
+  return hay;
+}
+
 /** Case-insensitive search over the template's words, theme and category. */
 export function searchTemplates(
   defs: TemplateDef[],
@@ -90,22 +125,11 @@ export function searchTemplates(
 ): TemplateDef[] {
   const q = query.trim().toLowerCase();
   if (!q) return defs;
+  const parts = q.split(/\s+/);
   return defs.filter((d) => {
-    const theme = getTheme(d.theme);
-    const hay = [
-      theme.id,
-      d.category,
-      d.kind,
-      ...(["en", "ar"] as const).flatMap((l) => {
-        const c = theme.copy[l];
-        return [c.title, c.kicker, c.subtitle, c.name];
-      }),
-    ]
-      .join(" ")
-      .toLowerCase();
+    const hay = `${haystack(d.theme)} ${d.kind.toLowerCase()}`;
     return (
-      q.split(/\s+/).every((word) => hay.includes(word)) ||
-      templateName(d, locale).toLowerCase().includes(q)
+      parts.every((word) => hay.includes(word)) || templateName(d, locale).toLowerCase().includes(q)
     );
   });
 }

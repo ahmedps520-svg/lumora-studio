@@ -23,11 +23,19 @@ export async function POST(request: Request) {
   const auth = await getAuth();
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user.emailVerified) return json({ error: "sign_in" }, 401);
-  const { subject, html, text } = renderEmail("test", emailLocale(request), {
+  const { subject, html, text, attachments } = renderEmail("test", emailLocale(request), {
     name: session.user.name,
+    siteUrl: new URL(request.url).origin,
   });
   try {
-    const { sent } = await sendEmail({ to: session.user.email, subject, html, text, kind: "test" });
+    const { sent } = await sendEmail({
+      to: session.user.email,
+      subject,
+      html,
+      text,
+      kind: "test",
+      attachments,
+    });
     return json({ sent });
   } catch (error) {
     return json({ error: error instanceof EmailError ? "refused" : "failed" }, 502);

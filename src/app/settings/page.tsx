@@ -12,6 +12,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { currentUser } from "@/lib/auth/session";
 import { APP_NAME, APP_VERSION } from "@/lib/config";
+import { PageLight } from "@/components/light/dawn";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("settings");
@@ -89,10 +90,7 @@ export default async function SettingsPage({
 
   return (
     <div className="relative isolate min-h-dvh">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[420px] bg-aurora [mask-image:linear-gradient(to_bottom,black_40%,transparent)] opacity-70"
-      />
+      <PageLight />
       <SiteHeader />
       <main id="main" className="mx-auto max-w-3xl space-y-5 px-4 pt-8 pb-20 sm:px-6">
         <div className="space-y-2">

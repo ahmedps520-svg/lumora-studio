@@ -2,12 +2,13 @@
 
 import { Search } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { useMemo, useState } from "react";
+import { useDeferredValue, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { TemplateCard } from "@/components/templates/template-card";
 import { useBatches } from "@/components/templates/use-batches";
+import { useTemplateCatalog } from "@/components/templates/use-template-library";
 import {
   searchTemplates,
   STYLE_FONTS,
@@ -39,24 +40,27 @@ export function TemplatesPanel() {
   const format = useEditorStore((s) => s.design?.format);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<string | null>(null);
+  const { all } = useTemplateCatalog();
+  const search = useDeferredValue(query);
   const fitting = useMemo(
-    () => (format ? templatesForSize(format.width, format.height, format.presetId) : []),
-    [format],
+    () => (format ? templatesForSize(format.width, format.height, format.presetId, all) : []),
+    [format, all],
   );
   const shown = useMemo(
     () =>
       searchTemplates(
         fitting.filter((d) => !category || d.category === category),
-        query,
+        search,
         locale,
       ),
-    [fitting, category, query, locale],
+    [fitting, category, search, locale],
   );
   const { visible, hasMore, more, sentinel } = useBatches(shown, 24);
   if (!format) return null;
 
   const apply = async (def: TemplateDef) => {
-    const { buildTemplate } = await import("@/lib/templates");
+    const { buildTemplate, loadTemplateLibrary } = await import("@/lib/templates");
+    await loadTemplateLibrary();
     const built = buildTemplate(def, locale, format);
     pageActions.applyTemplate(built.pages);
     toast.success(
